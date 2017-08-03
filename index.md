@@ -7,6 +7,29 @@ title: Multicopter Setup
 ## 概要
 
 ### ハードウェア構成
+![](http://g.gravizo.com/g?
+  digraph G {
+    DronePort [shape=box]
+    WaypointController [shape=box]
+    GPS [shape=box]
+    Camera [shape=box];NaviCtrl [shape=box]
+    FlightCtrl [shape=box]
+    ESC [shape=box]
+    Transmitter [shape=box]
+    DronePort -> WaypointController
+    WaypointController -> DronePort
+    WaypointController -> NaviCtrl[label="UART via USB"]
+    NaviCtrl -> WaypointController
+    Camera -> NaviCtrl[label="CSI"]
+    GPS -> NaviCtrl[label="UART via USB"]
+    NaviCtrl -> FlightCtrl[label="UART via GPIO"]
+    FlightCtrl -> NaviCtrl;
+    Transmitter -> FlightCtrl[label="SBus"]
+    FlightCtrl -> ESC [label="I2C"]
+  }
+)
+
+
 
 ## 開発用Ubuntuマシンのセットアップ
 
