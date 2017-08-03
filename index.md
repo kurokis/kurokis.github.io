@@ -69,7 +69,7 @@ Linux共通(開発用Ubuntuマシン、Raspberry Pi)のチートシート
 
 ## NaviCtrl
 
-### Communication Payload
+### 通信ペイロード
 ![](http://g.gravizo.com/g?
   digraph G {
     FlightCtrl [shape=box]
@@ -90,3 +90,53 @@ Linux共通(開発用Ubuntuマシン、Raspberry Pi)のチートシート
     Logging -> MainProcess
   }
 )
+
+### ライブラリ依存関係
+
+![](http://g.gravizo.com/g?
+  digraph G {
+    aruco
+    Eigen3
+    OpenCV2
+    raspicam
+    disp [shape=box]
+    mygps [shape=box]
+    mymarker [shape=box]
+    myserial [shape=box]
+    mytcp [shape=box]
+    logger [shape=box]
+    navigator [shape=box]
+    stateestimator [shape=box]
+    shared [shape=box]
+    RasPiMain [shape=Msquare]
+    Marker [shape=Msquare]
+    GPSServer [shape=Msquare]
+    aruco -> mymarker
+    Eigen3 -> mymarker
+    Eigen3 -> stateestimator
+    OpenCV2 -> mymarker
+    raspicam -> Marker
+    mygps -> RasPiMain
+    mygps -> GPSServer
+    mymarker -> Marker
+    myserial -> mygps
+    myserial -> RasPiMain
+    mytcp -> RasPiMain
+    mytcp -> Marker
+    mytcp -> GPSServer
+    disp -> RasPiMain
+    logger -> RasPiMain
+    navigator -> RasPiMain
+    stateestimator -> RasPiMain
+    shared -> disp
+    shared -> logger
+    shared -> navigator
+    shared -> stateestimator
+    shared -> RasPiMain
+    Marker -> RasPiMain
+    GPSServer -> RasPiMain
+  }
+)
+
+Todo
+-  
