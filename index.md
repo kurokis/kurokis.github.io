@@ -69,27 +69,27 @@ Linux共通(開発用Ubuntuマシン、Raspberry Pi)のチートシート
 
 ## NaviCtrl
 
-### 通信ペイロード
+### 通信概要
 ![](http://g.gravizo.com/g?
   digraph G {
     FlightCtrl [shape=box]
     MainProcess [shape=record]
     MarkerProcess [shape=box]
     GPSProcess [shape=box]
-    StateEstimator
-    Logging
     WaypointController -> MainProcess [label="FromWaypointController"]
     MainProcess -> WaypointController [label="ToWaypointController"]
     FlightCtrl -> MainProcess [label="FromFlightCtrl"]
     MainProcess -> FlightCtrl [label="ToFlightCtrl"]
     MarkerProcess -> MainProcess [label="MarkerPacket"]
     GPSProcess -> MainProcess [label="GPSPacket"]
-    MainProcess -> StateEstimator [label="shared memory"]
-    StateEstimator -> MainProcess
-    MainProcess -> Logging [label="shared memory"]
-    Logging -> MainProcess
   }
 )
+
+FlightCtrl, NaviCtrl, WaypointController間の通信はすべてUT Protocolに基づくシリアル通信で行う。
+[UT Protocolの詳細](ut_protocol.html)
+
+MainProcess, MarkerProcess, GPSProcess間の通信はTCP通信で行う。
+
 
 ### ライブラリ依存関係
 
@@ -137,6 +137,3 @@ Linux共通(開発用Ubuntuマシン、Raspberry Pi)のチートシート
     GPSServer -> RasPiMain
   }
 )
-
-Todo
--  
