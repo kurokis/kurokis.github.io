@@ -6,6 +6,10 @@ title: Multicopter Setup
 
 ## 概要
 
+このガイドは、マルチコプターの開発に必要なハードウェア、ソフトウェア、通信プロトコル等の情報を網羅的にカバーする目的で作成した。
+
+記載情報は適宜更新してゆく予定である。
+
 ### ハードウェア構成
 ![](http://g.gravizo.com/g?
   digraph G {
@@ -29,7 +33,15 @@ title: Multicopter Setup
   }
 )
 
+#### WaypointControllerとNaviCtrlの接続について
 
+WaypointControllerとNaviCtrlの通信はUARTであるが、物理的な接続はRaspberry PiのGPIOピンではなく**USBポート**を使う。これは、NaviCtrlのGPIOピンがFlightCtrlとの通信で占有されているからである。
+
+通信にはMONOSTICKを使うことを考えている。MONOSTICKはUSBポートに差し込むことでデバイス間の無線シリアル通信を可能にする。
+
+[MONOSTICK 公式ウェブサイト](https://mono-wireless.com/jp/products/MoNoStick/index.html)
+
+有線での通信も検討しているが、USB->シリアル->USBという2重の変換が必要となるため、この変換用の制御ボードを別途作らなければならない可能性がある。構成のシンプルさを優先するため、現在はMONOSTICKの利用が有力と考えている。
 
 ## 開発用Ubuntuマシンのセットアップ
 
@@ -50,3 +62,5 @@ Linux共通(開発用Ubuntuマシン、Raspberry Pi)のチートシート
 [Cheat Sheet](linux_cheat_sheet.html)
 
 ## 通信プロトコル
+
+今後記載予定
