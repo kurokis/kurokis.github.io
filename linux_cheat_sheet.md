@@ -24,6 +24,6 @@ $ sudo chmod o+wr /dev/ttyUSB0
 
 終了するためには``Enter``を押したのち``~.``と入力する。
 
-参考: http://answers.ros.org/question/46790/failed-to-open-port-devttyusb0/
+## デバイスとttyUSBxの対応を確認する方法
 
-``dmesg|grep usb``でどのデバイスがttyUSB*に登録されているか確認
+``dmesg|grep usb``で確認できる。

@@ -59,7 +59,7 @@ ls /dev/ttyUSB*
     | idVendor   | 067b  |
     | idProduct  | 2303  |
 
-
+    
 1. udevルールを変更する
 
     USBデバイスの設定は /etc/udev/rules.d に格納されており、ここに新しくルールを定義する。50-myusb.rulesというファイルを作り、テキストエディタ(例えばgedit)でその内容を編集する。

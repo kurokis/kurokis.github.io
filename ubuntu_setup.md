@@ -44,7 +44,7 @@ Edit > Preferences > Install から検索、インストールすることがで
     Gitを使い始めるためには、まずこれらを設定する必要がある。
     各コミットにこれらの情報が登録されるので、プライバシーについては要注意。
     Githubアカウントを持っていてメールアドレスを公開したくない場合、<アカウント名>@users.noreply.github.comを設定すると良い。
-  
+
     ```bash
     $ git config --global user.name "Taro Suzuki"
     $ git config --global user.email taro@users.noreply.github.com
@@ -61,17 +61,17 @@ Edit > Preferences > Install から検索、インストールすることがで
     1. 秘密鍵/公開鍵ペアの生成
 
         ターミナルを開き、ssh秘密鍵/公開鍵を生成する。Emailアドレスは、Githubアカウントを登録したメールアドレスを用いる。
-    
+
         ```bash
         $ ssh-keygen -t rsa -C "email_address@example.com"
         ```
         これを実行するとホームフォルダ下の隠しディレクトリ /.ssh に秘密鍵と公開鍵が生成される。正常に作成されているかは``$ ls ~/.ssh``で確認できる。
-        
+
         ```bash
         $ ls ~/.ssh
         id_rsa    id_rsa.pub
         ```
-    
+
         id_rsaが秘密鍵、id_rsa.pubが公開鍵である。
 
     2. 公開鍵の登録
@@ -90,14 +90,14 @@ Edit > Preferences > Install から検索、インストールすることがで
 
         以下のメッセージが出てきたら、yesと入力して続行する。
         ```
-        The authenticity of host 'github.com (192.30.255.112)' can't be established.
-        RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8.
+        The authenticity of host 'github.com (<github IP address>)' can't be established.
+        RSA key fingerprint is SHA256:<github SHA256 hash>.
         Are you sure you want to continue connecting (yes/no)?
         ```
 
         接続に成功していれば以下のメッセージが表示される。
         ```
-        Warning: Permanently added 'github.com,192.30.255.113' (RSA) to the list of known hosts.
+        Warning: Permanently added 'github.com,<github IP addree>' (RSA) to the list of known hosts.
         Hi <username>! You've successfully authenticated, but GitHub does not provide shell access.
         ```
 
