@@ -6,7 +6,7 @@ title: Multicopter Setup
 
 ## 概要
 
-このガイドは、マルチコプターの開発に必要なハードウェア、ソフトウェア、通信プロトコル等の情報を網羅的にカバーする目的で作成した。
+このガイドは、マルチコプターの開発に必要なハードウェア、ソフトウェア、通信プロトコル等の情報を網羅する目的で作成した。
 
 記載情報は適宜更新してゆく予定である。
 
@@ -16,7 +16,8 @@ title: Multicopter Setup
     DronePort [shape=box]
     WaypointController [shape=box]
     GPS [shape=box]
-    Camera [shape=box];NaviCtrl [shape=box]
+    Camera [shape=box];
+    NaviCtrl [shape=box]
     FlightCtrl [shape=box]
     ESC [shape=box]
     RCTransmitter [shape=box]
@@ -72,20 +73,21 @@ Linux共通(開発用Ubuntuマシン、Raspberry Pi)のチートシート
 ### 通信概要
 ![](http://g.gravizo.com/g?
   digraph G {
+    WaypointController [shape=box]
     FlightCtrl [shape=box]
-    MainProcess [shape=record]
-    MarkerProcess [shape=box]
-    GPSProcess [shape=box]
-    WaypointController -> MainProcess [label="FromWaypointController"]
-    MainProcess -> WaypointController [label="ToWaypointController"]
-    FlightCtrl -> MainProcess [label="FromFlightCtrl"]
-    MainProcess -> FlightCtrl [label="ToFlightCtrl"]
-    MarkerProcess -> MainProcess [label="MarkerPacket"]
-    GPSProcess -> MainProcess [label="GPSPacket"]
+    RasPiMain [shape=box]
+    Marker [shape=box]
+    GPSServer [shape=box]
+    WaypointController -> RasPiMain [label="UT Protocol"]
+    RasPiMain -> WaypointController
+    FlightCtrl -> RasPiMain [label="UT Protocol"]
+    RasPiMain -> FlightCtrl
+    Marker -> RasPiMain [label="TCP"]
+    GPSServer -> RasPiMain [label="TCP"]
   }
 )
 
-FlightCtrl, NaviCtrl, WaypointController間の通信はすべてUT Protocolに基づくシリアル通信で行う。
+FlightCtrl, NaviCtrl(RasPiMain, Marker, GPSServer), WaypointController間の通信はすべてUT Protocolに基づくシリアル通信で行う。
 [UT Protocolの詳細](ut_protocol.html)
 
 MainProcess, MarkerProcess, GPSProcess間の通信はTCP通信で行う。
@@ -95,17 +97,18 @@ MainProcess, MarkerProcess, GPSProcess間の通信はTCP通信で行う。
 
 ![](http://g.gravizo.com/g?
   digraph G {
-    aruco
-    Eigen3
-    OpenCV2
-    raspicam
+    aruco [shape=box3d]
+    Eigen3 [shape=box3d]
+    OpenCV2 [shape=box3d]
+    raspicam [shape=box3d]
     disp [shape=box]
+    logger [shape=box]
     mygps [shape=box]
     mymarker [shape=box]
     myserial [shape=box]
     mytcp [shape=box]
-    logger [shape=box]
     navigator [shape=box]
+    serial [shape=box]
     stateestimator [shape=box]
     shared [shape=box]
     RasPiMain [shape=Msquare]
@@ -116,17 +119,18 @@ MainProcess, MarkerProcess, GPSProcess間の通信はTCP通信で行う。
     Eigen3 -> stateestimator
     OpenCV2 -> mymarker
     raspicam -> Marker
+    disp -> RasPiMain
+    logger -> RasPiMain
     mygps -> RasPiMain
     mygps -> GPSServer
     mymarker -> Marker
-    myserial -> mygps
     myserial -> RasPiMain
     mytcp -> RasPiMain
     mytcp -> Marker
     mytcp -> GPSServer
-    disp -> RasPiMain
-    logger -> RasPiMain
     navigator -> RasPiMain
+    serial -> mygps
+    serial -> myserial;
     stateestimator -> RasPiMain
     shared -> disp
     shared -> logger
