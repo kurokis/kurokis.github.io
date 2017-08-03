@@ -19,7 +19,7 @@ title: Multicopter Setup
     Camera [shape=box];NaviCtrl [shape=box]
     FlightCtrl [shape=box]
     ESC [shape=box]
-    Transmitter [shape=box]
+    RCTransmitter [shape=box]
     DronePort -> WaypointController
     WaypointController -> DronePort
     WaypointController -> NaviCtrl[label="UART via USB"]
@@ -28,7 +28,7 @@ title: Multicopter Setup
     GPS -> NaviCtrl[label="UART via USB"]
     NaviCtrl -> FlightCtrl[label="UART via GPIO"]
     FlightCtrl -> NaviCtrl;
-    Transmitter -> FlightCtrl[label="SBus"]
+    RCTransmitter -> FlightCtrl[label="SBus"]
     FlightCtrl -> ESC [label="I2C"]
   }
 )
@@ -64,3 +64,29 @@ Linux共通(開発用Ubuntuマシン、Raspberry Pi)のチートシート
 ## 通信プロトコル
 
 今後記載予定
+
+## FlightCtrl
+
+## NaviCtrl
+
+### Communication Payload
+![](http://g.gravizo.com/g?
+  digraph G {
+    FlightCtrl [shape=box]
+    MainProcess [shape=record]
+    MarkerProcess [shape=box]
+    GPSProcess [shape=box]
+    StateEstimator
+    Logging
+    WaypointController -> MainProcess [label="FromWaypointController"]
+    MainProcess -> WaypointController [label="ToWaypointController"]
+    FlightCtrl -> MainProcess [label="FromFlightCtrl"]
+    MainProcess -> FlightCtrl [label="ToFlightCtrl"]
+    MarkerProcess -> MainProcess [label="MarkerPacket"]
+    GPSProcess -> MainProcess [label="GPSPacket"]
+    MainProcess -> StateEstimator [label="shared memory"]
+    StateEstimator -> MainProcess
+    MainProcess -> Logging [label="shared memory"]
+    Logging -> MainProcess
+  }
+)
