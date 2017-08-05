@@ -10,6 +10,13 @@ title: Multicopter Setup
 
 記載情報は適宜更新してゆく予定である。
 
+### カスタムファームウェア
+
+FlightCtrl: https://github.com/kurokis/FlightCtrl2
+
+NaviCtrl: https://github.com/Akihiro-K/RasPiMain
+
+
 ### ハードウェア構成
 ![](http://g.gravizo.com/g?
   digraph G {
