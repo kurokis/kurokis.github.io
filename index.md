@@ -43,13 +43,13 @@ NaviCtrl: https://github.com/Akihiro-K/RasPiMain
 
 #### WaypointControllerとNaviCtrlの接続について
 
-WaypointControllerとNaviCtrlの通信はUARTであるが、物理的な接続はRaspberry PiのGPIOピンではなく**USBポート**を使う。これは、NaviCtrlのGPIOピンがFlightCtrlとの通信で占有されているからである。
+WaypointControllerとNaviCtrlの通信はUARTであるが、NaviCtrl側の接続はRaspberry PiのGPIOピンではなく**USBポート**を使う。これは、NaviCtrlのGPIOピンがFlightCtrlとの通信で占有されているからである。一方、WaypointController側の接続はGPIOピンを使う。
 
-通信にはMONOSTICKを使うことを考えている。MONOSTICKはUSBポートに差し込むことでデバイス間の無線シリアル通信を可能にする。
+~~通信にはMONOSTICKを使うことを考えている。MONOSTICKはUSBポートに差し込むことでデバイス間の無線シリアル通信を可能にする。~~
 
-[MONOSTICK 公式ウェブサイト](https://mono-wireless.com/jp/products/MoNoStick/index.html)
+~~[MONOSTICK 公式ウェブサイト](https://mono-wireless.com/jp/products/MoNoStick/index.html)~~
 
-有線での通信も検討しているが、USB->シリアル->USBという2重の変換が必要となるため、この変換用の制御ボードを別途作らなければならない可能性がある。構成のシンプルさを優先するため、現在はMONOSTICKの利用が有力と考えている。
+~~有線での通信も検討しているが、USB->シリアル->USBという2重の変換が必要となるため、この変換用の制御ボードを別途作らなければならない可能性がある。構成のシンプルさを優先するため、現在はMONOSTICKの利用が有力と考えている。~~
 
 ## 開発用Ubuntuマシンのセットアップ
 
@@ -71,13 +71,6 @@ Linux共通(開発用Ubuntuマシン、Raspberry Pi)のチートシート
 
 ## 通信プロトコル
 
-今後記載予定
-
-## FlightCtrl
-
-## NaviCtrl
-
-### 通信概要
 ![](http://g.gravizo.com/g?
   digraph G {
     WaypointController [shape=box]
@@ -99,6 +92,10 @@ FlightCtrl, NaviCtrl(RasPiMain, Marker, GPSServer), WaypointController間の通�
 
 MainProcess, MarkerProcess, GPSProcess間の通信はTCP通信で行う。
 
+
+## FlightCtrl
+
+## NaviCtrl
 
 ### ライブラリ依存関係
 
@@ -146,5 +143,37 @@ MainProcess, MarkerProcess, GPSProcess間の通信はTCP通信で行う。
     shared -> RasPiMain
     Marker -> RasPiMain
     GPSServer -> RasPiMain
+  }
+)
+
+## Waypoints
+
+詳細はTBD
+
+![](http://g.gravizo.com/g?
+  digraph G {
+    subgraph cluster_2{
+      label = "Route Manager"
+      subgraph cluster_0 {
+        label = "Route 0"
+        wp00[label="waypoint 0"]
+        wp01[label="waypoint 1"]
+        wp02[label="waypoint 2"]
+        wp03[label="waypoint 3"]
+        wp00 -> wp01[label="edge 1"]
+        wp01 -> wp02[label="edge 2"]
+        wp02 -> wp03[label="edge 3"]
+      }
+      subgraph cluster_1 {
+        label = "Route 1"
+        wp10[label="waypoint 0"]
+        wp11[label="waypoint 1"]
+        wp12[label="waypoint 2"]
+        wp13[label="waypoint 3"]
+        wp10 -> wp11[label="edge 1"]
+        wp11 -> wp12[label="edge 2"]
+        wp12 -> wp13[label="edge 3"]
+      }
+    }
   }
 )
