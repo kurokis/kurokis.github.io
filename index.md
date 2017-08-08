@@ -101,48 +101,49 @@ MainProcess, MarkerProcess, GPSProcess間の通信はTCP通信で行う。
 
 ![](http://g.gravizo.com/g?
   digraph G {
-    aruco [shape=box3d]
-    Eigen3 [shape=box3d]
-    OpenCV2 [shape=box3d]
-    raspicam [shape=box3d]
-    disp [shape=box]
-    logger [shape=box]
-    mygps [shape=box]
-    mymarker [shape=box]
-    myserial [shape=box]
-    mytcp [shape=box]
-    navigator [shape=box]
-    serial [shape=box]
-    stateestimator [shape=box]
-    shared [shape=box]
-    RasPiMain [shape=Msquare]
-    Marker [shape=Msquare]
-    GPSServer [shape=Msquare]
-    aruco -> mymarker
-    Eigen3 -> mymarker
-    Eigen3 -> stateestimator
-    OpenCV2 -> mymarker
-    raspicam -> Marker
-    disp -> RasPiMain
-    logger -> RasPiMain
-    mygps -> RasPiMain
-    mygps -> GPSServer
-    mymarker -> Marker
-    myserial -> RasPiMain
-    mytcp -> RasPiMain
-    mytcp -> Marker
-    mytcp -> GPSServer
-    navigator -> RasPiMain
-    serial -> mygps
-    serial -> myserial;
-    stateestimator -> RasPiMain
-    shared -> disp
-    shared -> logger
-    shared -> navigator
-    shared -> stateestimator
-    shared -> RasPiMain
-    Marker -> RasPiMain
-    GPSServer -> RasPiMain
+    aruco [shape=box3d];
+    Eigen3 [shape=box3d];
+    OpenCV2 [shape=box3d];
+    raspicam [shape=box3d];;
+    disp [shape=box];
+    gps [shape=box];
+    logger [shape=box];
+    marker [shape=box];
+    tcp [shape=box];
+    navigator [shape=box];
+    nc [shape=box];
+    serial [shape=box];
+    stateestimator [shape=box];
+    shared [shape=box];
+    utserial [shape=box];
+    RasPiMain [shape=Msquare];
+    Marker [shape=Msquare];
+    GPSServer [shape=Msquare];
+    aruco -> marker;
+    Eigen3 -> marker;
+    Eigen3 -> stateestimator;
+    OpenCV2 -> marker;
+    raspicam -> Marker;
+    disp -> nc;
+    gps -> RasPiMain;
+    gps -> GPSServer;
+    logger -> nc;
+    marker -> Marker;
+    navigator -> nc;
+    nc -> RasPiMain;
+    serial -> gps;
+    serial -> utserial;
+    stateestimator -> nc;
+    shared -> disp;
+    shared -> logger;
+    shared -> navigator;
+    shared -> stateestimator;
+    tcp -> RasPiMain;
+    tcp -> Marker;
+    tcp -> GPSServer;
+    utserial -> RasPiMain;
+    Marker -> RasPiMain;
+    GPSServer -> RasPiMain;
   }
 )
 
@@ -153,26 +154,26 @@ MainProcess, MarkerProcess, GPSProcess間の通信はTCP通信で行う。
 ![](http://g.gravizo.com/g?
   digraph G {
     subgraph cluster_2{
-      label = "Route Manager"
+      label = "Route Manager";
       subgraph cluster_0 {
-        label = "Route 0"
-        wp00[label="waypoint 0"]
-        wp01[label="waypoint 1"]
-        wp02[label="waypoint 2"]
-        wp03[label="waypoint 3"]
-        wp00 -> wp01[label="edge 1"]
-        wp01 -> wp02[label="edge 2"]
-        wp02 -> wp03[label="edge 3"]
+        label = "Route 0";
+        wp00[label="waypoint 0"];
+        wp01[label="waypoint 1"];
+        wp02[label="waypoint 2"];
+        wp03[label="waypoint 3"];
+        wp00 -> wp01[label="edge 1"];
+        wp01 -> wp02[label="edge 2"];
+        wp02 -> wp03[label="edge 3"];
       }
       subgraph cluster_1 {
-        label = "Route 1"
-        wp10[label="waypoint 0"]
-        wp11[label="waypoint 1"]
-        wp12[label="waypoint 2"]
-        wp13[label="waypoint 3"]
-        wp10 -> wp11[label="edge 1"]
-        wp11 -> wp12[label="edge 2"]
-        wp12 -> wp13[label="edge 3"]
+        label = "Route 1";
+        wp10[label="waypoint 0"];
+        wp11[label="waypoint 1"];
+        wp12[label="waypoint 2"];
+        wp13[label="waypoint 3"];
+        wp10 -> wp11[label="edge 1"];
+        wp11 -> wp12[label="edge 2"];
+        wp12 -> wp13[label="edge 3"];
       }
     }
   }
