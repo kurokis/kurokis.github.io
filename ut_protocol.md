@@ -31,7 +31,7 @@ ID|From|To|Function
 --|----|--|--------
  1|NaviCtrl  |FlightCtrl|Send data for position control
  1|FlightCtrl|NaviCtrl  |Send data for logging
-10|Drone Port|NaviCtrl  |Downlink request
+~~10~~|~~Drone Port~~|~~NaviCtrl~~  |~~Downlink request~~
 10|NaviCtrl  |Drone Port|Downlink data
 11|Drone Port|NaviCtrl  |Set navigation mode
 11|NaviCtrl  |Drone Port|Set navigation mode response
@@ -40,19 +40,21 @@ ID|From|To|Function
 
 ## ペイロード詳細
 
-ID = 10, NaviCtrl -> FlightCtrl, Downlink request
+~~ID = 10, Drone Port -> NaviCtrl, Downlink request~~
 
-Name|Type|Bytes|Meanings
+~~Name~~|~~Type~~|~~Bytes~~|~~Meanings~~
 ----|----|-----|--------
 -|-|0|-
 ||0|
 
-ID = 10, FlightCtrl -> NaviCtrl, Downlink data
+ID = 10, NaviCtrl -> Drone Port, Downlink data
+
+リクエストに応答するのではなく、NaviCtrlから定期的に送信する方式に変更。送信レートは暫定的に2Hzとする（要検討）。
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
-nav_mode|uint8_t|1|OFF: 0, HOLD: 1, AUTO: 2, HOME: 3
-nav_status|uint8_t|1|000abcde
+nav_mode|uint8_t|1|0: Disarm, 1: Arm, 2: Off (manual mode), 3: Hold, 4: Auto, 5: Takeoff to hold, 6: Takeoff to auto, 7: Land
+nav_status|uint8_t|1|00abcdef
 waypoint_status|uint8_t|1|TBD
 gps_status|uint8_t|1|TBD
 position|float[3]|12|position in meters
@@ -60,25 +62,26 @@ velocity|float[3]|12|velocity in m/s
 quaternion|float[4]|16|attitude quaternion [q0,qx,qy,qz]
 ||44|
 
-- a: NAV_STATUS_BIT_POSITION_RESET_REQUEST
-- b: NAV_STATUS_BIT_LOW_PRECISION_VERTICAL
-- c: NAV_STATUS_BIT_VELOCITY_DATA_OK
-- d: NAV_STATUS_BIT_POSITION_DATA_OK
-- e: NAV_STATUS_BIT_HEADING_DATA_OK"
+- a: NAV_STATUS_BIT_ON_GROUND
+- b: NAV_STATUS_BIT_POSITION_RESET_REQUEST
+- c: NAV_STATUS_BIT_LOW_PRECISION_VERTICAL
+- d: NAV_STATUS_BIT_VELOCITY_DATA_OK
+- e: NAV_STATUS_BIT_POSITION_DATA_OK
+- f: NAV_STATUS_BIT_HEADING_DATA_OK"
 
 ID = 11, Drone Port -> NaviCtrl, Set navigation mode
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
-write_data|uint8_t|1|0: read-only, 1: read-write
-nav_mode_request|uint8_t|1|OFF: 0, HOLD: 1, AUTO: 2, HOME: 3, TAKEOFF_TO_HOLD: 4, LAND: 5, ARM: 6
+write_data|uint8_t|1|0: read-only, 1: write
+nav_mode_request|uint8_t|1|0: Disarm, 1: Arm, 2: Off (manual mode), 3: Hold, 4: Auto, 5: Takeoff to hold, 6: Takeoff to auto, 7: Land
 ||2|
 
 ID = 11, NaviCtrl -> Drone Port, Set navigation mode response
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
-nav_mode|uint8_t|1|OFF: 0, HOLD: 1, AUTO: 2, HOME: 3, TAKEOFF_TO_HOLD: 4, LAND: 5, ARM: 6
+nav_mode|uint8_t|1|0: Disarm, 1: Arm, 2: Off (manual mode), 3: Hold, 4: Auto, 5: Takeoff to hold, 6: Takeoff to auto, 7: Land
 unused|uint8_t|1|
 ||2|
 
@@ -86,7 +89,7 @@ ID = 12, Drone Port -> NaviCtrl, Set waypoint
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
-write_data|uint8_t|1|0: read-only, 1: read-write
+write_data|uint8_t|1|0: read-only, 1: write
 route_number|uint8_t|1|0,1,2,3
 number_of_waypoints|uint8_t|1|
 waypoint_number|uint8_t|1|
