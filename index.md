@@ -102,70 +102,75 @@ MainProcess, MarkerProcess, GPSProcess間の通信はTCP通信で行う。
 
 この制御機構は遷移速度v_transitと遷移角速度psidot_transitによってターゲットが遠く離れている場合に制御コマンドを制限できるようになっているが、v_transitとpsidot_transitが無限大の極限でx,y,z,psi方向が互いに独立な状態量フィードバック制御に帰着する。したがって制御器の設計には極配置法や最適レギュレータなどの手法を利用することができる。
 
-![](http://g.gravizo.com/g?
-digraph G {
-  subgraph cluster_0 {
-    x_target
-    y_target
-    z_target
-    v_transit
-    psi_target
-    psidot_transit
-    label = "original commands";
+![](http://g.gravizo.com/source/control_scheme?https%3a%2f%2fraw%2egithubusercontent%2ecom%2fkurokis%2fkurokis%2egithub%2eio%2fmaster%2findex%2emd)
+<details>
+  <summary></summary>
+  control_scheme
+  digraph G {
+    subgraph cluster_0 {
+      x_target
+      y_target
+      z_target
+      v_transit
+      psi_target
+      psidot_transit
+      label = "original commands";
+    }
+    subgraph cluster_1 {
+      gbx_target
+      gby_target
+      p_command
+      q_command
+      r_command
+      label = "intermediate commands";
+    }
+    subgraph cluster_2 {
+      pdot_command
+      qdot_command
+      rdot_command
+      wdot_command
+      label = "control commands";
+    }
+    u_command[label="u_command=0"]
+    v_command[label="v_command=0"]
+    w_command[label="w_command=0"]
+    form_angular_rate_command[shape=box]
+    form_psi_command[shape=box]
+    psi_target -> form_psi_command;
+    psidot_transit -> form_psi_command;
+    form_psi_command -> psi_command;
+    psidot_transit -> form_angular_rate_command
+    form_angular_rate_command -> p_command
+    form_angular_rate_command -> q_command
+    form_angular_rate_command -> r_command
+    form_position_command[shape=box]
+    x_target -> form_position_command
+    y_target -> form_position_command
+    z_target -> form_position_command
+    v_transit -> form_position_command
+    form_position_command -> x_command
+    form_position_command -> y_command
+    form_position_command -> z_command
+    x_command -> gbx_target[label="kx"]
+    y_command -> gby_target[label="ky"]
+    u_command -> gbx_target[label="ku"]
+    v_command -> gby_target[label="kv"]
+    gbx_target -> theta_command
+    gby_target -> phi_command
+    q_command -> qdot_command[label="kq"]
+    p_command -> pdot_command[label="kp"]
+    r_command -> rdot_command[label="kr"]
+    theta_command -> qdot_command[label="ktheta"]
+    phi_command -> pdot_command[label="kphi"]
+    psi_command -> rdot_command[label="kpsi"]
+    z_command -> wdot_command[label="kz"]
+    w_command -> wdot_command[label="kw"]
+    pdot_command -> pdot_command[label="kpdot"]
+    qdot_command -> qdot_command[label="kqdot"]
+    wdot_command -> wdot_command[label="kwdot"]
   }
-  subgraph cluster_1 {
-    gbx_target
-    gby_target
-    p_command
-    q_command
-    r_command
-    label = "intermediate commands";
-  }
-  subgraph cluster_2 {
-    pdot_command
-    qdot_command
-    rdot_command
-    wdot_command
-    label = "control commands";
-  }
-  u_command[label="u_command=0"]
-  v_command[label="v_command=0"]
-  w_command[label="w_command=0"]
-  form_angular_rate_command[shape=box]
-  form_psi_command[shape=box]
-  psi_target -> form_psi_command;
-  psidot_transit -> form_psi_command;
-  form_psi_command -> psi_command;
-  psidot_transit -> form_angular_rate_command
-  form_angular_rate_command -> p_command
-  form_angular_rate_command -> q_command
-  form_angular_rate_command -> r_command
-  form_position_command[shape=box]
-  x_target -> form_position_command
-  y_target -> form_position_command
-  z_target -> form_position_command
-  v_transit -> form_position_command
-  form_position_command -> x_command
-  form_position_command -> y_command
-  form_position_command -> z_command
-  x_command -> gbx_target[label="kx"]
-  y_command -> gby_target[label="ky"]
-  u_command -> gbx_target[label="ku"]
-  v_command -> gby_target[label="kv"]
-  gbx_target -> theta_command
-  gby_target -> phi_command
-  q_command -> qdot_command[label="kq"]
-  p_command -> pdot_command[label="kp"]
-  r_command -> rdot_command[label="kr"]
-  theta_command -> qdot_command[label="ktheta"]
-  phi_command -> pdot_command[label="kphi"]
-  psi_command -> rdot_command[label="kpsi"]
-  z_command -> wdot_command[label="kz"]
-  w_command -> wdot_command[label="kw"]
-  pdot_command -> pdot_command[label="kpdot"]
-  qdot_command -> qdot_command[label="kqdot"]
-  wdot_command -> wdot_command[label="kwdot"]
-})
+  control_scheme
+</details>
 
 ### S.Bus
 
@@ -343,30 +348,34 @@ SBusSetChannels(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
 
 詳細はTBD
 
-![](http://g.gravizo.com/g?
-  digraph G {
-    subgraph cluster_2{
-      label = "Route Manager";
-      subgraph cluster_0 {
-        label = "Route 0";
-        wp00[label="waypoint 0"];
-        wp01[label="waypoint 1"];
-        wp02[label="waypoint 2"];
-        wp03[label="waypoint 3"];
-        wp00 -> wp01[label="edge 1"];
-        wp01 -> wp02[label="edge 2"];
-        wp02 -> wp03[label="edge 3"];
-      }
-      subgraph cluster_1 {
-        label = "Route 1";
-        wp10[label="waypoint 0"];
-        wp11[label="waypoint 1"];
-        wp12[label="waypoint 2"];
-        wp13[label="waypoint 3"];
-        wp10 -> wp11[label="edge 1"];
-        wp11 -> wp12[label="edge 2"];
-        wp12 -> wp13[label="edge 3"];
-      }
+![](https://g.gravizo.com/source/route_manager?https%3a%2f%2fraw%2egithubusercontent%2ecom%2fkurokis%2fkurokis%2egithub%2eio%2fmaster%2findex%2emd)
+<details>
+<summary></summary>
+route_manager
+digraph G {
+  subgraph cluster_2{
+    label = "Route Manager";
+    subgraph cluster_0 {
+      label = "Route 0";
+      wp00[label="waypoint 0"];
+      wp01[label="waypoint 1"];
+      wp02[label="waypoint 2"];
+      wp03[label="waypoint 3"];
+      wp00 -> wp01[label="edge 1"];
+      wp01 -> wp02[label="edge 2"];
+      wp02 -> wp03[label="edge 3"];
+    }
+    subgraph cluster_1 {
+      label = "Route 1";
+      wp10[label="waypoint 0"];
+      wp11[label="waypoint 1"];
+      wp12[label="waypoint 2"];
+      wp13[label="waypoint 3"];
+      wp10 -> wp11[label="edge 1"];
+      wp11 -> wp12[label="edge 2"];
+      wp12 -> wp13[label="edge 3"];
     }
   }
-)
+}
+route_manager
+</details>
