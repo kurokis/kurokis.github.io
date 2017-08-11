@@ -343,30 +343,33 @@ SBusSetChannels(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
 
 詳細はTBD
 
-![](http://g.gravizo.com/g?
-  digraph G {
-    subgraph cluster_2{
-      label = "Route Manager";
-      subgraph cluster_0 {
-        label = "Route 0";
-        wp00[label="waypoint 0"];
-        wp01[label="waypoint 1"];
-        wp02[label="waypoint 2"];
-        wp03[label="waypoint 3"];
-        wp00 -> wp01[label="edge 1"];
-        wp01 -> wp02[label="edge 2"];
-        wp02 -> wp03[label="edge 3"];
-      }
-      subgraph cluster_1 {
-        label = "Route 1";
-        wp10[label="waypoint 0"];
-        wp11[label="waypoint 1"];
-        wp12[label="waypoint 2"];
-        wp13[label="waypoint 3"];
-        wp10 -> wp11[label="edge 1"];
-        wp11 -> wp12[label="edge 2"];
-        wp12 -> wp13[label="edge 3"];
-      }
+![](https://g.gravizo.com/source/route_manager?https%3a%2f%2fraw%2egithubusercontent%2ecom%2fkurokis%2fkurokis%2egithub%2eio%2fmaster%2findex%2emd)
+<summary></summary>
+route_manager
+digraph G {
+  subgraph cluster_2{
+    label = "Route Manager";
+    subgraph cluster_0 {
+      label = "Route 0";
+      wp00[label="waypoint 0"];
+      wp01[label="waypoint 1"];
+      wp02[label="waypoint 2"];
+      wp03[label="waypoint 3"];
+      wp00 -> wp01[label="edge 1"];
+      wp01 -> wp02[label="edge 2"];
+      wp02 -> wp03[label="edge 3"];
+    }
+    subgraph cluster_1 {
+      label = "Route 1";
+      wp10[label="waypoint 0"];
+      wp11[label="waypoint 1"];
+      wp12[label="waypoint 2"];
+      wp13[label="waypoint 3"];
+      wp10 -> wp11[label="edge 1"];
+      wp11 -> wp12[label="edge 2"];
+      wp12 -> wp13[label="edge 3"];
     }
   }
-)
+}
+route_manager
+</details>
