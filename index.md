@@ -95,6 +95,78 @@ MainProcess, MarkerProcess, GPSProcess間の通信はTCP通信で行う。
 
 ## FlightCtrl
 
+### 制御アルゴリズム
+
+高レベル制御コマンドとしてターゲット位置、ターゲット方位およびこれらの最大遷移速度を受けつけ、低レベル制御コマンドの角加速度コマンドとz機軸加速度コマンドを生成する。
+特徴として、中間コマンドに各速度コマンドと機体座標における重力ベクトルのコマンドを保持すること、姿勢表現にクオータニオンを用いていることが挙げられる。
+
+この制御機構は遷移速度v_transitと遷移角速度psidot_transitによってターゲットが遠く離れている場合に制御コマンドを制限できるようになっているが、v_transitとpsidot_transitが無限大の極限でx,y,z,psi方向が互いに独立な状態量フィードバック制御に帰着する。したがって制御器の設計には極配置法や最適レギュレータなどの手法を利用することができる。
+
+![](http://g.gravizo.com/g?
+digraph G {
+  subgraph cluster_0 {
+    x_target
+    y_target
+    z_target
+    v_transit
+    psi_target
+    psidot_transit
+    label = "original commands";
+  }
+  subgraph cluster_1 {
+    gbx_target
+    gby_target
+    p_command
+    q_command
+    r_command
+    label = "intermediate commands";
+  }
+  subgraph cluster_2 {
+    pdot_command
+    qdot_command
+    rdot_command
+    wdot_command
+    label = "control commands";
+  }
+  u_command[label="u_command=0"]
+  v_command[label="v_command=0"]
+  w_command[label="w_command=0"]
+  form_angular_rate_command[shape=box]
+  form_psi_command[shape=box]
+  psi_target -> form_psi_command;
+  psidot_transit -> form_psi_command;
+  form_psi_command -> psi_command;
+  psidot_transit -> form_angular_rate_command
+  form_angular_rate_command -> p_command
+  form_angular_rate_command -> q_command
+  form_angular_rate_command -> r_command
+  form_position_command[shape=box]
+  x_target -> form_position_command
+  y_target -> form_position_command
+  z_target -> form_position_command
+  v_transit -> form_position_command
+  form_position_command -> x_command
+  form_position_command -> y_command
+  form_position_command -> z_command
+  x_command -> gbx_target[label="kx"]
+  y_command -> gby_target[label="ky"]
+  u_command -> gbx_target[label="ku"]
+  v_command -> gby_target[label="kv"]
+  gbx_target -> theta_command
+  gby_target -> phi_command
+  q_command -> qdot_command[label="kq"]
+  p_command -> pdot_command[label="kp"]
+  r_command -> rdot_command[label="kr"]
+  theta_command -> qdot_command[label="ktheta"]
+  phi_command -> pdot_command[label="kphi"]
+  psi_command -> rdot_command[label="kpsi"]
+  z_command -> wdot_command[label="kz"]
+  w_command -> wdot_command[label="kw"]
+  pdot_command -> pdot_command[label="kpdot"]
+  qdot_command -> qdot_command[label="kqdot"]
+  wdot_command -> wdot_command[label="kwdot"]
+})
+
 ## NaviCtrl
 
 ### ライブラリ依存関係
