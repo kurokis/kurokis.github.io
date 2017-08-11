@@ -167,6 +167,126 @@ digraph G {
   wdot_command -> wdot_command[label="kwdot"]
 })
 
+### S.Bus
+
+![Futaba 14SG](images/futaba_14sg_front_labeled.jpg)
+
+現状(Mode 1)
+
+Switch|Channel|Function
+------|-------|--------
+J1|0|roll
+J3|1|pitch
+J2|2|thrust
+J4|3|yaw
+T1|8|trim 0
+T2|9|trim 1
+T3|10|trim 2
+T4|11|trim 3
+SA|4|switch 0/route selection
+SB|6|switch 1?
+SC|6|switch 2?
+SD|7|takeoff
+SE|5|nav control
+SF|16|altitude control
+SG|6|go home?
+SH|17|on-off
+LD|6|switch 3?
+RD|6|switch 4?
+
+SBusSwitch(0)=>ROUTE (enum, 0,1,2)
+
+SBusSwitch(1)=>?
+
+```c
+static enum NavModeBits {
+  NAV_BIT_MODE_0     = 1<<0,
+  NAV_BIT_MODE_1     = 1<<1,
+  NAV_BIT_HOLD_RESET = 1<<2,
+  NAV_BIT_RESERVED_0 = 1<<3,
+  NAV_BIT_ROUTE_0    = 1<<4, // route lower bit
+  NAV_BIT_ROUTE_1    = 1<<5, // route upper bit
+  NAV_BIT_SWITCH_0   = 1<<6, // route switch lower bit
+  NAV_BIT_SWITCH_1   = 1<<7, // route switch upper bit
+} nav_mode_request_;
+```
+
+#### 変更予定
+現状ではメンテナンス性が悪いので以下に変更予定。
+この変更によりFutaba 14SGの設定も変える必要が生じる。
+また、RouteスイッチをDOWN以外にした時のNaviCtrl側の処理も今後追加する必要がある。
+
+
+Switch|Channel|Function
+------|-------|--------
+J1|0|roll
+J2|1|thrust
+J3|2|pitch
+J4|3|yaw
+T1|4|trim 0
+T2|5|trim 1
+T3|6|trim 2
+T4|7|trim 3
+SA|8|switch 0/route selection
+SB|9|switch 1/-
+SC|10|switch 2/land
+SD|11|switch 3/takeoff
+SE|12|switch 4/nav control
+SF|13|switch 5/altitude control
+SG|14|switch 6/go home
+SH|15|switch 7/on-off
+LD|16|switch 8/-
+RD|17|switch 9/-
+
+sbus.c
+```c
+void SBusSetChannels(uint8_t roll, uint8_t thrust, uint8_t pitch, uint8_t yaw,
+  uint8_t trim0, uint8_t trim1, uint8_t trim2, uint8_t trim3,
+  uint8_t switch0, uint8_t switch1, uint8_t switch2, uint8_t switch3,
+  uint8_t switch4, uint8_t switch5, uint8_t switch6, uint8_t switch7,
+  uint8_t switch8, uint8_t switch9)
+{
+  channel_pitch_ = pitch;
+  channel_roll_ = roll;
+  channel_yaw_ = yaw;
+  channel_thrust_ = thrust;
+  channel_on_off_ = switch7;
+  channel_altitude_control_ = switch5;
+  channel_nav_control_ = switch4;
+  channel_takeoff_ = switch7;
+  channel_go_home_ = switch6;
+  channel_route_ = switch 0;
+  channel_switch_[0] = switch1; // unused
+  channel_switch_[1] = switch2; // unused
+  channel_switch_[2] = switch8; // unused
+  channel_switch_[3] = switch9; // unused
+  channel_trim_[0] = trim0;
+  channel_trim_[1] = trim1;
+  channel_trim_[2] = trim2;
+  channel_trim_[3] = trim3;
+
+  eeprom_update_byte(&eeprom.sbus_channel_pitch, pitch);
+  eeprom_update_byte(&eeprom.sbus_channel_roll, roll);
+  eeprom_update_byte(&eeprom.sbus_channel_yaw, yaw);
+  eeprom_update_byte(&eeprom.sbus_channel_thrust, thrust);
+  eeprom_update_byte(&eeprom.sbus_channel_on_off, switch7);
+  eeprom_update_byte(&eeprom.sbus_channel_altitude_control, switch5);
+  eeprom_update_byte(&eeprom.sbus_channel_nav_control, switch4);
+  eeprom_update_byte(&eeprom.sbus_channel_takeoff, switch7);
+  eeprom_update_byte(&eeprom.sbus_channel_go_home, switch6);
+  eeprom_update_block((const void*)channel_switch_,
+    (void*)&eeprom.sbus_channel_switch[0], sizeof(channel_switch_));
+  eeprom_update_block((const void*)channel_trim_,
+    (void*)&eeprom.sbus_channel_trim[0], sizeof(channel_trim_));
+}
+```
+
+main.c
+
+```c
+SBusSetChannels(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
+```
+
 ## NaviCtrl
 
 ### ライブラリ依存関係
