@@ -5,12 +5,14 @@ title: Multicopter Setup
 # マルチコプター開発ガイド
 
 ## 概要
+---
 
 このガイドは、マルチコプターの開発に必要なハードウェア、ソフトウェア、通信プロトコル等の情報を網羅する目的で作成した。
 
 記載情報は適宜更新してゆく予定である。
 
 ## カスタムファームウェア
+---
 
 ### FlightCtrl
 
@@ -36,6 +38,7 @@ title: Multicopter Setup
 
 
 ## ハードウェア
+---
 
 ### 構成
 ![](http://g.gravizo.com/g?
@@ -86,24 +89,28 @@ title: Multicopter Setup
 WaypointControllerとNaviCtrlの通信はUARTであるが、NaviCtrl側の接続はRaspberry PiのGPIOピンではなく**USBポート**を使う。これは、NaviCtrlのGPIOピンがFlightCtrlとの通信で占有されているからである。一方、WaypointController側の接続はGPIOピンを使う。
 
 ## 開発用Ubuntuマシンのセットアップ
+---
 
 FlightCtrlはUbuntuマシンから書き込む必要がある。
 
 [Ubuntuマシンのセットアップ](ubuntu_setup.html)
 
 ## Raspberry Pi 3のセットアップ
+---
 
 NaviCtrlはRaspberry Pi 3上で動作する。
 
 [Raspberry Piのセットアップ](rpi_setup.html)
 
 ## Linux Cheat Sheet
+---
 
 Linux共通(開発用Ubuntuマシン、Raspberry Pi)のチートシート
 
 [Cheat Sheet](linux_cheat_sheet.html)
 
 ## 通信プロトコル
+---
 
 ![](http://g.gravizo.com/g?
   digraph G {
@@ -128,6 +135,7 @@ MainProcess, MarkerProcess, GPSProcess間の通信はTCP通信で行う。
 
 
 ## Drone Portとの連携によるウェイポイント制御
+---
 
 ### シーケンス図
 
