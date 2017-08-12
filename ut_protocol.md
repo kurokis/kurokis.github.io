@@ -31,29 +31,21 @@ ID|From|To|Function
 --|----|--|--------
  1|NaviCtrl  |FlightCtrl|Send data for position control
  1|FlightCtrl|NaviCtrl  |Send data for logging
-~~10~~|~~Drone Port~~|~~NaviCtrl~~  |~~Downlink request~~
-10|NaviCtrl  |Drone Port|Downlink data
-11|Drone Port|NaviCtrl  |Set navigation mode
-11|NaviCtrl  |Drone Port|Set navigation mode response
+10|NaviCtrl  |Drone Port|Downlink
+11|Drone Port|NaviCtrl  |Set drone port mode
+11|NaviCtrl  |Drone Port|Set drone port mode response
 12|Drone Port|NaviCtrl  |Set waypoint
 12|NaviCtrl  |Drone Port|Set waypoint response
 
 ## ペイロード詳細
 
-~~ID = 10, Drone Port -> NaviCtrl, Downlink request~~
-
-~~Name~~|~~Type~~|~~Bytes~~|~~Meanings~~
-----|----|-----|--------
--|-|0|-
-||0|
-
-ID = 10, NaviCtrl -> Drone Port, Downlink data
+ID = 10, NaviCtrl -> Drone Port, Downlink
 
 リクエストに応答するのではなく、NaviCtrlから定期的に送信する方式に変更。送信レートは暫定的に2Hzとする（要検討）。
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
-nav_mode|uint8_t|1|0: Disarm, 1: Arm, 2: Off (manual mode), 3: Hold, 4: Auto, 5: Takeoff to hold, 6: Takeoff to auto, 7: Land
+drone_port_mode|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: DPHold, 4: DPWaypoint, 5: TakeoffToDPHold, 6: TakeoffToDPWaypoint, 7: Land
 nav_status|uint8_t|1|00abcdef
 waypoint_status|uint8_t|1|TBD
 gps_status|uint8_t|1|TBD
@@ -69,19 +61,31 @@ quaternion|float[4]|16|attitude quaternion [q0,qx,qy,qz]
 - e: NAV_STATUS_BIT_POSITION_DATA_OK
 - f: NAV_STATUS_BIT_HEADING_DATA_OK"
 
-ID = 11, Drone Port -> NaviCtrl, Set navigation mode
+```c
+struct ToDronePort {
+  uint8_t drone_port_mode;
+  uint8_t nav_status;
+  uint8_t waypoint_status;
+  uint8_t gps_status;
+  float position[3];
+  float velocity[3];
+  float quaternion[4];
+} __attribute__((packed));
+```
+
+ID = 11, Drone Port -> NaviCtrl, Set drone port mode
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
 write_data|uint8_t|1|0: read-only, 1: write
-nav_mode_request|uint8_t|1|0: Disarm, 1: Arm, 2: Off (manual mode), 3: Hold, 4: Auto, 5: Takeoff to hold, 6: Takeoff to auto, 7: Land
+drone_port_mode_request|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: DPHold, 4: DPWaypoint, 5: TakeoffToDPHold, 6: TakeoffToDPWaypoint, 7: Land
 ||2|
 
-ID = 11, NaviCtrl -> Drone Port, Set navigation mode response
+ID = 11, NaviCtrl -> Drone Port, Set drone port mode response
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
-nav_mode|uint8_t|1|0: Disarm, 1: Arm, 2: Off (manual mode), 3: Hold, 4: Auto, 5: Takeoff to hold, 6: Takeoff to auto, 7: Land
+drone_port_mode|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: DPHold, 4: DPWaypoint, 5: TakeoffToDPHold, 6: TakeoffToDPWaypoint, 7: Land
 unused|uint8_t|1|
 ||2|
 
@@ -143,20 +147,6 @@ struct ToFlightCtrl {
   float transit_vel;
   float target_heading;
   float heading_rate;
-} __attribute__((packed));
-```
-
-## その他 (Serial)
-
-```c
-struct ToDronePort {
-  uint8_t nav_mode;
-  uint8_t nav_status;
-  uint8_t waypoint_status;
-  uint8_t gps_status;
-  float position[3];
-  float velocity[3];
-  float quaternion[4];
 } __attribute__((packed));
 ```
 
