@@ -142,6 +142,70 @@ MainProcess, MarkerProcess, GPSProcess間の通信はTCP通信で行う。
 パイロット、DPオペレータ、WaypointController、NaviCtrl、FlightCtrl
 の関係を時系列で示す。
 
+![](http://g.gravizo.com/source/drone_port_sequence?https%3a%2f%2fraw%2egithubusercontent%2ecom%2fkurokis%2fkurokis%2egithub%2eio%2fmaster%2findex%2emd)
+<details>
+  <summary></summary>
+  drone_port_sequence
+  @startuml;
+  actor Pilot as pilot;
+  actor "Drone Port Operator" as dpo;
+  actor "PC Operator" as pco;
+  participant "WaypointCtrl" as wc;
+  participant "NaviCtrl" as nc;
+  participant "FlightCtrl" as fc;
+  pco -> nc: power on;
+  pco -> nc: connect with ssh;
+  pilot -> fc: power on;
+  pilot -> fc: calibrate sensors;
+  activate fc;
+  note right: aircraft ready;
+  dpo -> wc: power on;
+  dpo -> wc: initialize;
+  activate wc;
+  note right: drone port ready;
+  fc --> pco: check flightctrl is ready;
+  pco -> nc: start navictrl process;
+  activate nc;
+  note right: position control ready;
+  pilot -> fc: set nav mode to auto;
+  fc -> nc: nav mode request: auto;
+  activate nc;
+  note left: auto mode start;
+  nc --> fc: nav mode: auto;
+  dpo -> wc: disarm motors;
+  wc -> nc: set dp mode: Disarm;
+  dpo -> wc: arm motors;
+  wc -> nc: set dp mode: Arm;
+  dpo -> wc: takeoff to hold;
+  wc -> nc: set dp mode: AutoTakeoffToDPHold;
+  nc -> wc: hold above takeoff location;
+  dpo -> wc: start waypoint control;
+  wc -> nc: set dp mode: AutoDPWaypoint;
+  dpo -> wc: emergency hold;
+  wc -> nc: set dp mode: DPHold;
+  nc --> wc: hold at current position;
+  wc --> dpo: check area is safe;
+  dpo -> wc: resume waypoint control;
+  wc -> nc: set dp mode: AudoDPWaypoint;
+  nc --> wc: hold at last waypoint;
+  wc --> dpo: check area is safe;
+  dpo -> wc: land;
+  wc -> nc: set dp mode: AutoLand;
+  nc --> wc: automatic switch to Arm;
+  wc --> dpo: check aircraft has landed;
+  dpo -> wc: disarm;
+  wc -> nc: set dp mode: Disarm;
+  pilot -> fc: set nav mode to off;
+  fc -> nc: nav mode request: off;
+  deactivate nc;
+  nc --> fc: nav mode: ;
+  deactivate wc;
+  deactivate nc;
+  deactivate fc;
+  @enduml
+  drone_port_sequence
+</details>
+
 ### 配置図
 
 ハードウェアの構成と、通信パケットを示す。
