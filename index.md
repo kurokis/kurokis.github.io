@@ -353,29 +353,85 @@ SBusSetChannels(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
 <summary></summary>
 route_manager
 digraph G {
-  subgraph cluster_2{
+  subgraph cluster_0{
     label = "Route Manager";
-    subgraph cluster_0 {
-      label = "Route 0";
+    subgraph cluster_1 {
+      label = "Route 0 (from file)";
+      style = "filled";
       wp00[label="waypoint 0"];
       wp01[label="waypoint 1"];
       wp02[label="waypoint 2"];
       wp03[label="waypoint 3"];
-      wp00 -> wp01[label="edge 1"];
-      wp01 -> wp02[label="edge 2"];
-      wp02 -> wp03[label="edge 3"];
+      wp00 -> wp01;
+      wp01 -> wp02;
+      wp02 -> wp03;
     }
-    subgraph cluster_1 {
-      label = "Route 1";
+    subgraph cluster_2 {
+      label = "Route 1 (from file)";
+      style= "filled";
       wp10[label="waypoint 0"];
       wp11[label="waypoint 1"];
       wp12[label="waypoint 2"];
       wp13[label="waypoint 3"];
-      wp10 -> wp11[label="edge 1"];
-      wp11 -> wp12[label="edge 2"];
-      wp12 -> wp13[label="edge 3"];
+      wp10 -> wp11;
+      wp11 -> wp12;
+      wp12 -> wp13;
+    }
+    subgraph cluster_3 {
+      label = "Route 2 (from Drone Port)";
+      style = "solid";
+      wp10[label="waypoint 0"];
+      wp11[label="waypoint 1"];
+      wp12[label="waypoint 2"];
+      wp13[label="waypoint 3"];
+      wp10 -> wp11;
+      wp11 -> wp12;
+      wp12 -> wp13;
     }
   }
 }
 route_manager
 </details>
+
+### 飛行モード
+
+Nav Mode|Nav Mode Meaning|Drone Port Mode|Drone Port Mode Meaning|Function
+--------|----------------|-------------|---------------------|--------
+0|Off |-|-|マニュアル飛行
+1|Hold|-|-|位置保持
+2|Auto|0 (default)|-|NaviCtrl内蔵ウェイポイントによるウェイポイント制御(モーターオフの時は何も起こらない)
+2|Auto|1|Disarm|モーターオフ
+2|Auto|2|Arm|モーターアイドリング
+2|Auto|3|DPHold|位置保持
+2|Auto|4|DPWaypoint|Drone Portから受信したウェイポイントによるウェイポイント制御
+2|Auto|5|TakeoffToDPHold|テイクオフ後上空2mで待機
+2|Auto|6|TakeoffToDPWaypoint|テイクオフ後DPウェイポイントによるウェイポイント制御
+2|Auto|7|Land|着陸
+
+![](http://g.gravizo.com/g?
+digraph G {
+  node[shape="oval",style="solid"]
+    AutoDisarm; AutoArm; AutoDPHold; AutoDPWaypoint; AutoTakeoffToDPHold; AutoTakeoffToDPWaypoint; AutoLand;
+  node[shape="oval",style="filled"]
+    Off; Hold; Auto;
+  node[shape="diamond",style="solid"]
+    nav_mode; waypoint_mode
+  node[shape="box",style="solid"]
+    RCTransmitter; DronePort;
+  RCTransmitter -> nav_mode
+  DronePort -> waypoint_mode
+  nav_mode -> Off [label="0"]
+  nav_mode -> Hold [label="1"]
+  nav_mode -> waypoint_mode [label="2"]
+  waypoint_mode -> Auto[label="0=default"]
+  waypoint_mode -> AutoDisarm[label="1"]
+  waypoint_mode -> AutoArm[label="2"]
+  waypoint_mode -> AutoDPHold[label="3"]
+  waypoint_mode -> AutoDPWaypoint[label="4"]
+  waypoint_mode -> AutoTakeoffToDPHold[label="5"]
+  waypoint_mode -> AutoTakeoffToDPWaypoint[label="6"]
+  waypoint_mode -> AutoLand[label="7"]
+  AutoTakeoffToDPHold -> AutoDPHold [label="takeoff complete"]
+  AutoTakeoffToDPWaypoint -> AutoDPWaypoint [label="takeoff complete"]
+  AutoLand -> AutoArm [label="touchdown"]
+})
