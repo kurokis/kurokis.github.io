@@ -54,7 +54,7 @@
 
 詳細はTBD
 
-![](https://g.gravizo.com/source/route_manager?https%3a%2f%2fraw%2egithubusercontent%2ecom%2fkurokis%2fkurokis%2egithub%2eio%2fmaster%2findex%2emd)
+![](https://g.gravizo.com/source/route_manager?https%3a%2f%2fraw%2egithubusercontent%2ecom%2fkurokis%2fkurokis%2egithub%2eio%2fmaster%2fnavictrl%2emd)
 <details>
 <summary></summary>
 route_manager
@@ -78,20 +78,19 @@ digraph G {
       wp10[label="waypoint 0"];
       wp11[label="waypoint 1"];
       wp12[label="waypoint 2"];
-      wp13[label="waypoint 3"];
       wp10 -> wp11;
       wp11 -> wp12;
-      wp12 -> wp13;
     }
     subgraph cluster_3 {
       label = "Route 2 (from Drone Port)";
-      wp10[label="waypoint 0"];
-      wp11[label="waypoint 1"];
-      wp12[label="waypoint 2"];
-      wp13[label="waypoint 3"];
-      wp10 -> wp11;
-      wp11 -> wp12;
-      wp12 -> wp13;
+      style= "solid";
+      wp20[label="waypoint 0"];
+      wp21[label="waypoint 1"];
+      wp22[label="waypoint 2"];
+      wp23[label="waypoint 3"];
+      wp20 -> wp11;
+      wp21 -> wp12;
+      wp22 -> wp13;
     }
   }
 }
