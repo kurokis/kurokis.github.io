@@ -216,24 +216,43 @@ MainProcess, MarkerProcess, GPSProcess間の通信はTCP通信で行う。
 プロポ入力で制御するnav modeと、ドローンポートで制御するdrone port modeを組み合わせ、flight modeを生成する。
 Flight modeに基づき、適切なターゲット位置を計算し、FlightCtrlへ送信する。
 
+**詳細はTBD**
 
-![](http://g.gravizo.com/g?
-digraph G {
-  RCTransmitter -> FlightCtrl [label="nav_mode_request"];
-  FlightCtrl -> FromFlightCtrlBuffer [label="nav_mode_request"];
-  DronePort -> FromDronePortBuffer [label="drone_port_mode_request"];
-  FromFlightCtrlBuffer -> FCHandler [label="nav_mode_request"];
-  FromDronePortBuffer -> DPHandler [label="drone_port_mode_request"];
-  FCHandler -> UpdateFlightMode [label="nav_mode"];
-  DPHandler -> UpdateFlightMode [label="drone_port_mode"];
-  UpdateFlightMode -> GenerateTargetPosition [label="flight_mode"];
-  FCHandler -> ToFlightCtrlBuffer [label="nav_mode"];
-  GenerateTargetPosition -> ToFlightCtrlBuffer [label="target_position"];
-  ToFlightCtrlBuffer -> FlightCtrl;
-  DPHandler -> ToDronePortBuffer [label="drone_port_mode"];
-  ToDronePortBuffer -> DronePort;
-}
-)
+![](http://g.gravizo.com/source/drone_port_mode_overview?https%3a%2f%2fraw%2egithubusercontent%2ecom%2fkurokis%2fkurokis%2egithub%2eio%2fmaster%2findex%2emd)
+<details>
+  <summary></summary>
+  drone_port_mode_overview
+  digraph G {
+    subgraph cluster_0{
+      label="NaviCtrl"
+      FromDronePortBuffer;
+      FromFlightCtrlBuffer
+      FCHandler;
+      DPHandler;
+      UpdateFlightMode;
+      GenerateTargetPosition;
+      ToFlightCtrlBuffer;
+      ToDronePortBuffer;
+    }
+    node [shape="box"]
+      RCTransmitter; FlightCtrl; DronePort;
+    RCTransmitter -> FlightCtrl [label="nav_mode_request"];
+    FlightCtrl -> FromFlightCtrlBuffer [label="nav_mode_request"];
+    DronePort -> FromDronePortBuffer [label="drone_port_mode_request"];
+    FromFlightCtrlBuffer -> FCHandler [label="nav_mode_request"];
+    FromDronePortBuffer -> DPHandler [label="drone_port_mode_request"];
+    FCHandler -> UpdateFlightMode [label="nav_mode"];
+    DPHandler -> UpdateFlightMode [label="drone_port_mode"];
+    UpdateFlightMode -> GenerateTargetPosition [label="flight_mode"];
+    UpdateFlightMode -> ToDronePortBuffer[label="flight_mode or equivalent"]
+    FCHandler -> ToFlightCtrlBuffer [label="nav_mode"];
+    GenerateTargetPosition -> ToFlightCtrlBuffer [label="target_position"];
+    ToFlightCtrlBuffer -> FlightCtrl[label="nav_mode, target_position"];
+    DPHandler -> ToDronePortBuffer [label="drone_port_mode"];
+    ToDronePortBuffer -> DronePort[label="drone_port_mode, flight_mode"];
+  }
+  drone_port_mode_overview
+</details>
 
 ### 制御スキーム詳細：Flight Modeの決定過程
 
