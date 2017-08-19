@@ -213,48 +213,18 @@ MainProcess, MarkerProcess, GPSProcess間の通信はTCP通信で行う。
 
 ### 制御スキーム概要
 
-プロポ入力で制御するnav modeと、ドローンポートで制御するdrone port modeを組み合わせ、flight modeを生成する。
-Flight modeに基づき、適切なターゲット位置を計算し、FlightCtrlへ送信する。
+プロポで操作するnav mode requestと、ドローンポートで操作するdrone port mode requestに応じて制御モードやターゲット位置が計算される。
+特に問題がなければリクエストはそのまま承諾されるが、異常時には機体の判断でリクエストと異なるモードが実行される。ここでいう異常とは以下のことである。
 
-**詳細はTBD**
+- カメラやGPSから位置情報が得られず、自律飛行が継続できない
+- プロポのスティックを操作したことにより、自律飛行が強制解除された
+- プロポからの信号をロストした(Go Homeモード、未実装)
+- etc.
 
-![](http://g.gravizo.com/source/drone_port_mode_overview?https%3a%2f%2fraw%2egithubusercontent%2ecom%2fkurokis%2fkurokis%2egithub%2eio%2fmaster%2findex%2emd)
-<details>
-  <summary></summary>
-  drone_port_mode_overview
-  digraph G {
-    subgraph cluster_0{
-      label="NaviCtrl"
-      FromDronePortBuffer;
-      FromFlightCtrlBuffer
-      FCHandler;
-      DPHandler;
-      UpdateFlightMode;
-      GenerateTargetPosition;
-      ToFlightCtrlBuffer;
-      ToDronePortBuffer;
-    }
-    node [shape="box"]
-      RCTransmitter; FlightCtrl; DronePort;
-    RCTransmitter -> FlightCtrl [label="nav_mode_request"];
-    FlightCtrl -> FromFlightCtrlBuffer [label="nav_mode_request"];
-    DronePort -> FromDronePortBuffer [label="drone_port_mode_request"];
-    FromFlightCtrlBuffer -> FCHandler [label="nav_mode_request"];
-    FromDronePortBuffer -> DPHandler [label="drone_port_mode_request"];
-    FCHandler -> UpdateFlightMode [label="nav_mode"];
-    DPHandler -> UpdateFlightMode [label="drone_port_mode"];
-    UpdateFlightMode -> GenerateTargetPosition [label="flight_mode"];
-    UpdateFlightMode -> ToDronePortBuffer[label="flight_mode or equivalent"]
-    FCHandler -> ToFlightCtrlBuffer [label="nav_mode"];
-    GenerateTargetPosition -> ToFlightCtrlBuffer [label="target_position"];
-    ToFlightCtrlBuffer -> FlightCtrl[label="nav_mode, target_position"];
-    DPHandler -> ToDronePortBuffer [label="drone_port_mode"];
-    ToDronePortBuffer -> DronePort[label="drone_port_mode, flight_mode"];
-  }
-  drone_port_mode_overview
-</details>
+Nav modeは機体の制御モードを司り、Off、Hold、Autoの3種類がある。
+Drone port modeはnav modeがAutoの時にのみ効力を持ち、ターゲット位置の計算やスロットル操作などを司る。Nav modeがAutoの時にのみ有効なのは、安全の観点から常にプロポの入力を優先させるためである。
 
-### 制御スキーム詳細：Flight Modeの決定過程
+Nav modeとdrone port modeに応じた機体の行動を下表に示す。
 
 Nav Mode|Nav Mode Meaning|Drone Port Mode|Drone Port Mode Meaning|Function
 --------|----------------|-------------|---------------------|--------
