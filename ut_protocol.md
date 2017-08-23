@@ -147,6 +147,28 @@ number_of_waypoints_missing|uint8_t[4]|4|number of waypoints missing for each of
 waypoint_number_missing|uint8_t[4]|4|smallest index of waypoint missing for each of 4 routes
 ||8|
 
+ID = 13, Drone Port -> NaviCtrl, Position
+
+Name|Type|Bytes|Meanings
+----|----|-----|--------
+timestamp|uint32_t|4|timestamp in microseconds
+position|float[4]|16|position in meters, North-East-Down coordinates
+quaternion|float[3]|12|vector part of quaternion
+r_var|float[3]|12|position variance in m^2
+status|uint8_t|1|1: detected, 0: not detected
+||45|
+
+```c
+struct FromDronePort {
+  uint32_t timestamp; // microseconds
+  float position[3]; // meter
+  float quaternion[3]; // x y z
+  float r_var[3]; // meter^2
+  uint8_t status; // 1 : detected, 0 : not detected
+} __attribute__((packed));
+```
+
+
 ## FlightCtrl-NaviCtrl間の通信ペイロード
 
 FlightCtrl -> NaviCtrl (FromFlightCtrl / ToNaviCtrl)
