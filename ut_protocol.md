@@ -74,7 +74,7 @@ Name|Type|Bytes|Meanings
 nav_mode|uint8_t|1|0: Off, 1: Hold, 2: Auto
 drone_port_mode|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: DPHold, 4: DPWaypoint, 5: TakeoffToDPHold, 6: TakeoffToDPWaypoint, 7: Land
 nav_status|uint8_t|1|00abcdef
-waypoint_number|uint8_t|1|waypoint number
+drone_port_status|uint8_t|1|000000gh
 position|float[3]|12|position in meters
 velocity|float[3]|12|velocity in m/s
 quaternion|float[4]|16|attitude quaternion [q0,qx,qy,qz]
@@ -85,14 +85,16 @@ quaternion|float[4]|16|attitude quaternion [q0,qx,qy,qz]
 - c: NAV_STATUS_BIT_LOW_PRECISION_VERTICAL
 - d: NAV_STATUS_BIT_VELOCITY_DATA_OK
 - e: NAV_STATUS_BIT_POSITION_DATA_OK
-- f: NAV_STATUS_BIT_HEADING_DATA_OK"
+- f: NAV_STATUS_BIT_HEADING_DATA_OK
+- g: DRONE_PORT_STATUS_ERROR_NO_PREVIOUS
+- h: DRONE_PORT_STATUS_END_OF_MODE
 
 ```c
 struct ToDronePort {
   uint8_t nav_mode;
   uint8_t drone_port_mode;
   uint8_t nav_status;
-  uint8_t waypoint_number;
+  uint8_t drone_port_status;
   float position[3];
   float velocity[3];
   float quaternion[4];
@@ -104,16 +106,19 @@ ID = 11, Drone Port -> NaviCtrl, Set drone port mode
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
 write_data|uint8_t|1|0: read-only, 1: write
-drone_port_mode_request|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: DPHold, 4: DPWaypoint, 5: TakeoffToDPHold, 6: TakeoffToDPWaypoint, 7: Land
+drone_port_mode_request|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: Hold, 4: Resume, 5: Waypoint, 6: Takeoff, 7: Land
 ||2|
 
 ID = 11, NaviCtrl -> Drone Port, Set drone port mode response
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
-drone_port_mode|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: DPHold, 4: DPWaypoint, 5: TakeoffToDPHold, 6: TakeoffToDPWaypoint, 7: Land
-unused|uint8_t|1|
+drone_port_mode|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: Hold, 4: Resume, 5: Waypoint, 6: Takeoff, 7: Land
+drone_port_status|uint8_t|1|000000gh
 ||2|
+
+- g: DRONE_PORT_STATUS_ERROR_NO_PREVIOUS
+- h: DRONE_PORT_STATUS_END_OF_MODE
 
 ID = 12, Drone Port -> NaviCtrl, Set waypoint
 
