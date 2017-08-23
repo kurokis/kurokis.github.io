@@ -229,22 +229,22 @@ Nav modeとdrone port modeに応じた機体の行動を下表に示す。
 Nav Mode|Nav Mode Meaning|Drone Port Mode|Drone Port Mode Meaning|Function
 --------|----------------|-------------|---------------------|--------
 0|Off |-|-|マニュアル飛行
-1|Hold|-|-|位置保持
+1|NCHold|-|-|位置保持
 2|Auto|0 (default)|-|NaviCtrl内蔵ウェイポイントによるウェイポイント制御(モーターオフの時は何も起こらない)
 2|Auto|1|Disarm|モーターオフ
 2|Auto|2|Arm|モーターアイドリング
-2|Auto|3|DPHold|位置保持
-2|Auto|4|DPWaypoint|Drone Portから受信したウェイポイントによるウェイポイント制御
-2|Auto|5|TakeoffToDPHold|テイクオフ後上空2mで待機
-2|Auto|6|TakeoffToDPWaypoint|テイクオフ後DPウェイポイントによるウェイポイント制御
+2|Auto|3|Hold|位置保持
+2|Auto|4|Resume|DPによるウェイポイント制御に復帰
+2|Auto|5|Waypoint|DPによるウェイポイント制御
+2|Auto|6|Takeoff|テイクオフ後上空2mで待機
 2|Auto|7|Land|着陸
 
 ![](http://g.gravizo.com/g?
 digraph G {
   node[shape="oval",style="solid"]
-    AutoDisarm; AutoArm; AutoDPHold; AutoDPWaypoint; AutoTakeoffToDPHold; AutoTakeoffToDPWaypoint; AutoLand;
+    Disarm; Arm; Hold; Resume; Waypoint; Takeoff; Land;
   node[shape="oval",style="filled"]
-    Off; Hold; Auto;
+    Off; NCHold; Auto;
   node[shape="diamond",style="solid"]
     nav_mode; drone_port_mode
   node[shape="box",style="solid"]
@@ -252,17 +252,14 @@ digraph G {
   RCTransmitter -> nav_mode
   DronePort -> drone_port_mode
   nav_mode -> Off [label="0"]
-  nav_mode -> Hold [label="1"]
+  nav_mode -> NCHold [label="1"]
   nav_mode -> drone_port_mode [label="2"]
   drone_port_mode -> Auto[label="0=default"]
-  drone_port_mode -> AutoDisarm[label="1"]
-  drone_port_mode -> AutoArm[label="2"]
-  drone_port_mode -> AutoDPHold[label="3"]
-  drone_port_mode -> AutoDPWaypoint[label="4"]
-  drone_port_mode -> AutoTakeoffToDPHold[label="5"]
-  drone_port_mode -> AutoTakeoffToDPWaypoint[label="6"]
-  drone_port_mode -> AutoLand[label="7"]
-  AutoTakeoffToDPHold -> AutoDPHold [label="takeoff complete"]
-  AutoTakeoffToDPWaypoint -> AutoDPWaypoint [label="takeoff complete"]
-  AutoLand -> AutoArm [label="touchdown"]
+  drone_port_mode -> Disarm[label="1"]
+  drone_port_mode -> Arm[label="2"]
+  drone_port_mode -> Hold[label="3"]
+  drone_port_mode -> Resume[label="4"]
+  drone_port_mode -> Waypoint[label="5"]
+  drone_port_mode -> Takeoff[label="6"]
+  drone_port_mode -> Land[label="7"]
 })
