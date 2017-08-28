@@ -19,7 +19,7 @@ Name|Type|Bytes|Meanings
 Start character|char    |1|'S' (0x53)
 Payload length |uint8_t |1|
 ID             |uint8_t |1|
-Unused         |uint8_t |1|0x0
+Sequence number         |uint8_t |1|currently 0, to be implemented
 Payload        |misc.   |N|
 CRC            |uint16_t|2|CRC-16-CCITT with both input and output reflected
 
@@ -72,7 +72,7 @@ ID = 10, NaviCtrl -> Drone Port, Downlink
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
 nav_mode|uint8_t|1|0: Off, 1: Hold, 2: Auto
-drone_port_mode|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: DPHold, 4: DPWaypoint, 5: TakeoffToDPHold, 6: TakeoffToDPWaypoint, 7: Land
+drone_port_mode|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: Hold, 4: Waypoint, 5: Takeoff, 6: Land
 nav_status|uint8_t|1|00abcdef
 drone_port_status|uint8_t|1|000000gh
 position|float[3]|12|position in meters
@@ -106,14 +106,14 @@ ID = 11, Drone Port -> NaviCtrl, Set drone port mode
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
 write_data|uint8_t|1|0: read-only, 1: write
-drone_port_mode_request|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: Hold, 4: Resume, 5: Waypoint, 6: Takeoff, 7: Land
+drone_port_mode_request|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: Hold, 4: Waypoint, 5: Takeoff, 6: Land
 ||2|
 
 ID = 11, NaviCtrl -> Drone Port, Set drone port mode response
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
-drone_port_mode|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: Hold, 4: Resume, 5: Waypoint, 6: Takeoff, 7: Land
+drone_port_mode|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: Hold, 4: Waypoint, 5: Takeoff, 6: Land
 drone_port_status|uint8_t|1|000000gh
 ||2|
 

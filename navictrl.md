@@ -20,18 +20,18 @@
     shared [shape=box];
     utserial [shape=box];
     RasPiMain [shape=Msquare];
-    Marker [shape=Msquare];
+    MarkerServer [shape=Msquare];
     GPSServer [shape=Msquare];
     aruco -> marker;
     Eigen3 -> marker;
     Eigen3 -> stateestimator;
     OpenCV2 -> marker;
-    raspicam -> Marker;
+    raspicam -> MarkerServer;
     disp -> nc;
     gps -> RasPiMain;
     gps -> GPSServer;
     logger -> nc;
-    marker -> Marker;
+    marker -> MarkerServer;
     navigator -> nc;
     nc -> RasPiMain;
     serial -> gps;
@@ -42,10 +42,10 @@
     shared -> navigator;
     shared -> stateestimator;
     tcp -> RasPiMain;
-    tcp -> Marker;
+    tcp -> MarkerServer;
     tcp -> GPSServer;
     utserial -> RasPiMain;
-    Marker -> RasPiMain;
+    MarkerServer -> RasPiMain;
     GPSServer -> RasPiMain;
   }
 )
