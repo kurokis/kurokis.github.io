@@ -153,3 +153,9 @@ ls /dev/ttyUSB*
 4. デバイス名が変更されていることを確認する
 
     ``ls -l /dev/ttyUSB*``を実行する。上手くいっていれば、/dev/ttyUSB_GPS -> ttyUSB0のような表示がある。
+
+
+## 製品のシリアル番号を使う方法
+
+外部サイト：
+[usb-serial のデバイスファイル名を固定する方法](http://d.hatena.ne.jp/pyopyopyo/20160223/p1)
