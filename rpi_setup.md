@@ -18,6 +18,60 @@ CMakeをインストール
 $ sudo apt-get install cmake
 ```
 
+## Wifiの優先度設定とIPアドレス固定
+
+外部サイト: [RaspberryPi で複数 Wifi 環境に個別設定を行う方法](http://kouki-hoshi.hatenablog.com/entry/2016/07/16/153836)
+
+以下を試す予定。（未検証）
+
+### /etc/wpa_supplicant/wpa_supplicant.conf
+
+```
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+ｃountry=GB
+
+network={
+    ssid="ssid1-????????"
+    psk="????????"
+    priority=0
+    key_mgmt=WPA-PSK
+}
+
+network={
+    ssid="ssid2-????????"
+    psk="????????"
+    priority=1
+    key_mgmt=WPA-PSK
+}
+```
+
+### /etc/network/interfaces
+
+```
+iface eth0 inet manual
+
+allow-hotplug wlan0
+iface wlan0 inet manual
+    wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+```
+
+### /etc/dhcpcd.conf
+
+192.168.1.100と192.168.20.30に固定したい場合：
+
+```
+interface wlan0
+ssid SSID-xxxx
+static ip_address=192.168.1.100/24
+static routers=192.168.1.1
+static domain_name_servers=192.168.1.1
+
+ssid SSID-yyyy
+static ip_address=192.168.20.30/24
+static routers=192.168.20.1
+static domain_name_servers=192.168.20.1
+```
 
 ## GPSデバイス
 
@@ -59,7 +113,7 @@ ls /dev/ttyUSB*
     | idVendor   | 067b  |
     | idProduct  | 2303  |
 
-    
+
 1. udevルールを変更する
 
     USBデバイスの設定は /etc/udev/rules.d に格納されており、ここに新しくルールを定義する。50-myusb.rulesというファイルを作り、テキストエディタ(例えばgedit)でその内容を編集する。
