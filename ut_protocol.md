@@ -54,6 +54,8 @@ static inline uint16_t CRCCCITT(const uint8_t * array, size_t length)
 ## ID一覧
 ---
 
+Implemention of ID=12 is a TODO for after September experiment.
+
 ID|From|To|Function
 --|----|--|--------
  1|NaviCtrl  |FlightCtrl|Send data for position control
@@ -61,8 +63,10 @@ ID|From|To|Function
 10|NaviCtrl  |Drone Port|Downlink
 11|Drone Port|NaviCtrl  |Set drone port mode
 11|NaviCtrl  |Drone Port|Set drone port mode response
-12|Drone Port|NaviCtrl  |Set waypoint
-12|NaviCtrl  |Drone Port|Set waypoint response
+~~12~~|~~Drone Port~~|~~NaviCtrl~~  |~~Set waypoint~~
+~~12~~|~~NaviCtrl~~  |~~Drone Port~~|~~Set waypoint response~~
+13| Drone Port | NaviCtrl | Send position
+
 
 ## 各種変数の意味
 
@@ -115,7 +119,8 @@ ID|From|To|Function
 ## ペイロード詳細
 ---
 
-ID = 10, NaviCtrl -> Drone Port, Downlink
+### ID = 10, NaviCtrl -> Drone Port, Downlink
+---
 
 リクエストに応答するのではなく、NaviCtrlから定期的に送信する方式に変更。送信レートは暫定的に2Hzとする（要検討）。
 
@@ -143,9 +148,9 @@ struct ToDronePort {
 } __attribute__((packed));
 ```
 
----
 
-ID = 11, Drone Port -> NaviCtrl, Set drone port mode
+### ID = 11, Drone Port -> NaviCtrl, Set drone port mode
+---
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
@@ -160,9 +165,9 @@ struct FromDPSetDronePortMode{
 } __attribute__((packed));
 ```
 
----
 
-ID = 11, NaviCtrl -> Drone Port, Set drone port mode response
+### ID = 11, NaviCtrl -> Drone Port, Set drone port mode response
+---
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
@@ -177,9 +182,11 @@ struct ToDPSetDronePortMode {
 } __attribute__((packed));
 ```
 
+
+### ~~ID = 12, Drone Port -> NaviCtrl, Set waypoint~~
 ---
 
-ID = 12, Drone Port -> NaviCtrl, Set waypoint
+TODO, after September experiment.
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
@@ -198,9 +205,11 @@ heading_rate|float|4|max heading rate in deg/s
 heading_range|float|4|max allowable heading error in deg
 ||38|
 
+
+### ~~ID = 12, NaviCtrl -> Drone Port, Set waypoint response~~
 ---
 
-ID = 12, NaviCtrl -> Drone Port, Set waypoint response
+TODO, after September experiment.
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
@@ -208,9 +217,9 @@ number_of_waypoints_missing|uint8_t[4]|4|number of waypoints missing for each of
 waypoint_number_missing|uint8_t[4]|4|smallest index of waypoint missing for each of 4 routes
 ||8|
 
----
 
-ID = 13, Drone Port -> NaviCtrl, Position
+### ID = 13, Drone Port -> NaviCtrl, Send position
+---
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
@@ -221,8 +230,11 @@ r_var|float[3]|12|position variance in m^2
 status|uint8_t|1|1: detected, 0: not detected
 ||45|
 
+Note: This payload is the same as `struct FromMarker` .
+
+structure:
 ```c
-struct FromDronePort {
+struct FromMarker {
   uint32_t timestamp; // microseconds
   float position[3]; // meter
   float quaternion[3]; // x y z
