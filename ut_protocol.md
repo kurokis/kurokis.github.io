@@ -76,7 +76,7 @@ Name|Type|Bytes|Meanings
 nav_mode|uint8_t|1|0: Off, 1: Hold, 2: Auto
 drone_port_mode|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: Hold, 4: Waypoint, 5: Takeoff, 6: Land
 nav_status|uint8_t|1|00abcdef
-drone_port_status|uint8_t|1|000000gh
+drone_port_status|uint8_t|1|0: DPStatusModeInProgress, 1: DPStatusEndOfMode
 position|float[3]|12|position in meters
 velocity|float[3]|12|velocity in m/s
 quaternion|float[4]|16|attitude quaternion [q0,qx,qy,qz]
@@ -88,8 +88,6 @@ quaternion|float[4]|16|attitude quaternion [q0,qx,qy,qz]
 - d: NAV_STATUS_BIT_VELOCITY_DATA_OK
 - e: NAV_STATUS_BIT_POSITION_DATA_OK
 - f: NAV_STATUS_BIT_HEADING_DATA_OK
-- g: DRONE_PORT_STATUS_ERROR_NO_PREVIOUS
-- h: DRONE_PORT_STATUS_END_OF_MODE
 
 ```c
 struct ToDronePort {
