@@ -135,7 +135,7 @@ velocity|float[3]|12|velocity in m/s
 quaternion|float[4]|16|attitude quaternion [q0,qx,qy,qz]
 ||44|
 
-
+code:
 ```c
 struct ToDronePort {
   uint8_t nav_mode;
@@ -158,6 +158,7 @@ write_data|uint8_t|1|0: read-only, 1: write
 drone_port_mode_request|uint8_t|1|
 ||2|
 
+code:
 ```c
 struct FromDPSetDronePortMode{
   uint8_t read_write; // 0: read-only, 1: write
@@ -175,6 +176,7 @@ drone_port_mode|uint8_t|1|
 drone_port_status|uint8_t|1|
 ||2|
 
+code:
 ```c
 struct ToDPSetDronePortMode {
   uint8_t drone_port_mode;
@@ -230,9 +232,10 @@ r_var|float[3]|12|position variance in m^2
 status|uint8_t|1|1: detected, 0: not detected
 ||45|
 
+
 Note: This payload is the same as `struct FromMarker` .
 
-structure:
+code:
 ```c
 struct FromMarker {
   uint32_t timestamp; // microseconds
@@ -249,6 +252,7 @@ struct FromMarker {
 
 FlightCtrl -> NaviCtrl (FromFlightCtrl / ToNaviCtrl)
 
+
 ```c
 struct FromFlightCtrl {
   uint16_t timestamp;
@@ -261,7 +265,9 @@ struct FromFlightCtrl {
 } __attribute__((packed));
 ```
 
+
 NaviCtrl -> FlightCtrl (ToFlightCtrl / FromNaviCtrl)
+
 
 ```c
 struct ToFlightCtrl {
@@ -279,6 +285,7 @@ struct ToFlightCtrl {
 } __attribute__((packed));
 ```
 
+
 ## その他　(TCP)
 ---
 
@@ -293,6 +300,7 @@ struct FromMarker {
 } __attribute__((packed));
 ```
 
+
 ```c
 struct FromGPS {
   int32_t longitude; // [10^-6 deg]
@@ -302,6 +310,7 @@ struct FromGPS {
   uint8_t gps_status; // 3: pos & vel OK 2: only pos OK 1: only vel OK 0: unavailable
 } __attribute__((packed));
 ```
+
 
 ```c
 struct FromLSM {
