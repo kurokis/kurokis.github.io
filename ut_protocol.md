@@ -52,6 +52,7 @@ static inline uint16_t CRCCCITT(const uint8_t * array, size_t length)
 ## WaypointController-NaviCtrl間の通信ペイロード
 
 ## ID一覧
+---
 
 ID|From|To|Function
 --|----|--|--------
@@ -64,6 +65,7 @@ ID|From|To|Function
 12|NaviCtrl  |Drone Port|Set waypoint response
 
 ## ペイロード詳細
+---
 
 ID = 10, NaviCtrl -> Drone Port, Downlink
 
@@ -101,6 +103,8 @@ struct ToDronePort {
 } __attribute__((packed));
 ```
 
+---
+
 ID = 11, Drone Port -> NaviCtrl, Set drone port mode
 
 Name|Type|Bytes|Meanings
@@ -109,16 +113,31 @@ write_data|uint8_t|1|0: read-only, 1: write
 drone_port_mode_request|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: Hold, 4: Waypoint, 5: Takeoff, 6: Land
 ||2|
 
+```c
+struct FromDPSetDronePortMode{
+  uint8_t read_write; // 0: read-only, 1: write
+  uint8_t drone_port_mode_request;
+} __attribute__((packed));
+```
+
+---
+
 ID = 11, NaviCtrl -> Drone Port, Set drone port mode response
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
 drone_port_mode|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: Hold, 4: Waypoint, 5: Takeoff, 6: Land
-drone_port_status|uint8_t|1|000000gh
+drone_port_status|uint8_t|1| 0: DPStatusModeInProgress, 1: DPStatusEndOfMode
 ||2|
 
-- g: DRONE_PORT_STATUS_ERROR_NO_PREVIOUS
-- h: DRONE_PORT_STATUS_END_OF_MODE
+```c
+struct ToDPSetDronePortMode {
+  uint8_t drone_port_mode;
+  uint8_t drone_port_status;
+} __attribute__((packed));
+```
+
+---
 
 ID = 12, Drone Port -> NaviCtrl, Set waypoint
 
@@ -139,6 +158,8 @@ heading_rate|float|4|max heading rate in deg/s
 heading_range|float|4|max allowable heading error in deg
 ||38|
 
+---
+
 ID = 12, NaviCtrl -> Drone Port, Set waypoint response
 
 Name|Type|Bytes|Meanings
@@ -146,6 +167,8 @@ Name|Type|Bytes|Meanings
 number_of_waypoints_missing|uint8_t[4]|4|number of waypoints missing for each of 4 routes
 waypoint_number_missing|uint8_t[4]|4|smallest index of waypoint missing for each of 4 routes
 ||8|
+
+---
 
 ID = 13, Drone Port -> NaviCtrl, Position
 
@@ -170,6 +193,7 @@ struct FromDronePort {
 
 
 ## FlightCtrl-NaviCtrl間の通信ペイロード
+---
 
 FlightCtrl -> NaviCtrl (FromFlightCtrl / ToNaviCtrl)
 
@@ -204,6 +228,8 @@ struct ToFlightCtrl {
 ```
 
 ## その他　(TCP)
+---
+
 
 ```c
 struct FromMarker {
@@ -217,11 +243,11 @@ struct FromMarker {
 
 ```c
 struct FromGPS {
-  float position[3];
-  float velocity[3];
-  float r_var[3];
-  float v_var[3];
-  uint8_t status; // 0x01: pos OK 0x02: vel OK
+  int32_t longitude; // [10^-6 deg]
+  int32_t latitude; // [10^-6 deg]
+  float z; // height above sea level [m], downward positive
+  float velocity[3]; // [m/s]
+  uint8_t gps_status; // 3: pos & vel OK 2: only pos OK 1: only vel OK 0: unavailable
 } __attribute__((packed));
 ```
 
