@@ -64,6 +64,54 @@ ID|From|To|Function
 12|Drone Port|NaviCtrl  |Set waypoint
 12|NaviCtrl  |Drone Port|Set waypoint response
 
+## 各種変数の意味
+
+  - nav_mode / nav_mode_request
+
+    ```c
+    enum NavMode {
+      NAV_MODE_OFF = 0,
+      NAV_MODE_HOLD = 1,
+      NAV_MODE_AUTO = 2,
+      NAV_MODE_HOME = 3,
+    };
+    ```
+  - drone_port_mode / drone_port_mode_request
+
+    ```c
+    enum DPMode {
+      NCWaypoint = 0,
+      Disarm = 1,
+      Arm = 2,
+      DPHold = 3,
+      DPWaypoint = 4,
+      Takeoff = 5, // Takeoff then hold
+      Land = 6,
+    };
+    ```
+
+  - nav_status
+
+    ```c
+    enum NavStatusBits {
+      HeadingOK = 1<<0,
+      PositionOK = 1<<1,
+      VelocityOK = 1<<2,
+      LOW_PRECISION_VERTICAL = 1<<3,
+      POSITION_RESET_REQUEST = 1<<4,
+      // TODO: ON_GROUND
+    };
+    ```
+
+  - drone_port_status
+
+    ```c
+    enum DPStatus {
+      DPStatusModeInProgress = 0,
+      DPStatusEndOfMode = 1,
+    };
+    ```
+
 ## ペイロード詳細
 ---
 
@@ -73,21 +121,15 @@ ID = 10, NaviCtrl -> Drone Port, Downlink
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
-nav_mode|uint8_t|1|0: Off, 1: Hold, 2: Auto
-drone_port_mode|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: Hold, 4: Waypoint, 5: Takeoff, 6: Land
-nav_status|uint8_t|1|00abcdef
-drone_port_status|uint8_t|1|0: DPStatusModeInProgress, 1: DPStatusEndOfMode
+nav_mode|uint8_t|1|
+drone_port_mode|uint8_t|1|
+nav_status|uint8_t|1|
+drone_port_status|uint8_t|1|
 position|float[3]|12|position in meters
 velocity|float[3]|12|velocity in m/s
 quaternion|float[4]|16|attitude quaternion [q0,qx,qy,qz]
 ||44|
 
-- a: NAV_STATUS_BIT_ON_GROUND
-- b: NAV_STATUS_BIT_POSITION_RESET_REQUEST
-- c: NAV_STATUS_BIT_LOW_PRECISION_VERTICAL
-- d: NAV_STATUS_BIT_VELOCITY_DATA_OK
-- e: NAV_STATUS_BIT_POSITION_DATA_OK
-- f: NAV_STATUS_BIT_HEADING_DATA_OK
 
 ```c
 struct ToDronePort {
@@ -108,7 +150,7 @@ ID = 11, Drone Port -> NaviCtrl, Set drone port mode
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
 write_data|uint8_t|1|0: read-only, 1: write
-drone_port_mode_request|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: Hold, 4: Waypoint, 5: Takeoff, 6: Land
+drone_port_mode_request|uint8_t|1|
 ||2|
 
 ```c
@@ -124,8 +166,8 @@ ID = 11, NaviCtrl -> Drone Port, Set drone port mode response
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
-drone_port_mode|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: Hold, 4: Waypoint, 5: Takeoff, 6: Land
-drone_port_status|uint8_t|1| 0: DPStatusModeInProgress, 1: DPStatusEndOfMode
+drone_port_mode|uint8_t|1|
+drone_port_status|uint8_t|1|
 ||2|
 
 ```c
