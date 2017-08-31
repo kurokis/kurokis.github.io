@@ -29,49 +29,48 @@ $ sudo apt-get install cmake
 ```
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
-ｃountry=GB
+country=GB
 
 network={
-    ssid="ssid1-????????"
-    psk="????????"
-    priority=0
-    key_mgmt=WPA-PSK
+        ssid="????????"
+        psk="????????"
+        priority=0
+        key_mgmt=WPA-PSK
+        id_str="WifiPocketRouter1"
 }
 
 network={
-    ssid="ssid2-????????"
-    psk="????????"
-    priority=1
-    key_mgmt=WPA-PSK
+        ssid="????????"
+        psk="????????"
+        priority=1
+        key_mgmt=WPA-PSK
+        id_str="LabWirelssRouterBuffaloG246E"
 }
+
 ```
 
 ### /etc/network/interfaces
 
 ```
-iface eth0 inet manual
-
+auto wlan0
 allow-hotplug wlan0
 iface wlan0 inet manual
-    wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+wpa-roam /etc/wpa_supplicant/wpa_supplicant.conf
+iface default inet dhcp
+
+iface WifiPocketRouter1 inet static
+address 192.168.128.169
+netmask 255.255.255.0
+gateway 192.168.128.1
+
+
+iface LabWirelessRouterBuffaloG246E inet static
+address 192.168.1.101
+netmask 255.255.255.0
+gateway 192.168.1.1
+
 ```
 
-### /etc/dhcpcd.conf
-
-192.168.1.100と192.168.20.30に固定したい場合：
-
-```
-interface wlan0
-ssid SSID-xxxx
-static ip_address=192.168.1.100/24
-static routers=192.168.1.1
-static domain_name_servers=192.168.1.1
-
-ssid SSID-yyyy
-static ip_address=192.168.20.30/24
-static routers=192.168.20.1
-static domain_name_servers=192.168.20.1
-```
 
 ## GPSデバイス
 
@@ -112,6 +111,7 @@ ls /dev/ttyUSB*
     |------------|-------|
     | idVendor   | 067b  |
     | idProduct  | 2303  |
+    | iSerial    | ???? (optional) |
 
 
 1. udevルールを変更する
@@ -129,12 +129,24 @@ ls /dev/ttyUSB*
     SUBSYSTEMS=="usb", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303", GROUP="users", MODE="0666", SYMLINK+="ttyUSB_GPS"
     ```
 
+    Using serial number (optional)
+    ```
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303", ATTRS{serial}=="????", GROUP="users", MODE="0666", SYMLINK+="ttyUSB_GPS"
+    ```
+
+
     意味は以下の通り
     - SUBSYSTEMS=="usb": USBデバイス
     - ATTRS{idVendor}=="067b": idVendorが067bのものを対象とする
     - ATTRS{idProduct}=="2303": idProductが2303のものを対象とする
+    - ATTRS{serial}="????"
     - MODE="0666": 全ユーザーに対して読み書きのアクセス権を与える
     - SYMLINK+="ttyUSB_GPS": このデバイスにttyUSB_GPSのシンボリックリンクを付加
+
+    Note
+    - == -> condition
+    - = -> insert
+    - += -> append
 
 2. 新しいルールをロードする
 
@@ -155,10 +167,15 @@ ls /dev/ttyUSB*
     ``ls -l /dev/ttyUSB*``を実行する。上手くいっていれば、/dev/ttyUSB_GPS -> ttyUSB0のような表示がある。
 
 
-## 製品のシリアル番号を使う方法
+### 製品のシリアル番号を使う方法
 
 外部サイト：
 [usb-serial のデバイスファイル名を固定する方法](http://d.hatena.ne.jp/pyopyopyo/20160223/p1)
+
+Suppose idVendor is 0403. Then
+`dmesg | grep -iC 4 0403`
+should give the serial number unique to the device.
+
 
 ## USB-GPIO cable
 
