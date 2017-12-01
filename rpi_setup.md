@@ -18,6 +18,59 @@ CMakeをインストール
 $ sudo apt-get install cmake
 ```
 
+## Wifiの優先度設定とIPアドレス固定
+
+外部サイト: [RaspberryPi で複数 Wifi 環境に個別設定を行う方法](http://kouki-hoshi.hatenablog.com/entry/2016/07/16/153836)
+
+以下を試す予定。（未検証）
+
+### /etc/wpa_supplicant/wpa_supplicant.conf
+
+```
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+country=GB
+
+network={
+        ssid="????????"
+        psk="????????"
+        priority=0
+        key_mgmt=WPA-PSK
+        id_str="WifiPocketRouter1"
+}
+
+network={
+        ssid="????????"
+        psk="????????"
+        priority=1
+        key_mgmt=WPA-PSK
+        id_str="LabWirelssRouterBuffaloG246E"
+}
+
+```
+
+### /etc/network/interfaces
+
+```
+auto wlan0
+allow-hotplug wlan0
+iface wlan0 inet manual
+wpa-roam /etc/wpa_supplicant/wpa_supplicant.conf
+iface default inet dhcp
+
+iface WifiPocketRouter1 inet static
+address 192.168.128.169
+netmask 255.255.255.0
+gateway 192.168.128.1
+
+
+iface LabWirelessRouterBuffaloG246E inet static
+address 192.168.1.101
+netmask 255.255.255.0
+gateway 192.168.1.1
+
+```
+
 
 ## GPSデバイス
 
@@ -58,8 +111,9 @@ ls /dev/ttyUSB*
     |------------|-------|
     | idVendor   | 067b  |
     | idProduct  | 2303  |
+    | iSerial    | ???? (optional) |
 
-    
+
 1. udevルールを変更する
 
     USBデバイスの設定は /etc/udev/rules.d に格納されており、ここに新しくルールを定義する。50-myusb.rulesというファイルを作り、テキストエディタ(例えばgedit)でその内容を編集する。
@@ -75,12 +129,24 @@ ls /dev/ttyUSB*
     SUBSYSTEMS=="usb", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303", GROUP="users", MODE="0666", SYMLINK+="ttyUSB_GPS"
     ```
 
+    Using serial number (optional)
+    ```
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303", ATTRS{serial}=="????", GROUP="users", MODE="0666", SYMLINK+="ttyUSB_GPS"
+    ```
+
+
     意味は以下の通り
     - SUBSYSTEMS=="usb": USBデバイス
     - ATTRS{idVendor}=="067b": idVendorが067bのものを対象とする
     - ATTRS{idProduct}=="2303": idProductが2303のものを対象とする
+    - ATTRS{serial}="????"
     - MODE="0666": 全ユーザーに対して読み書きのアクセス権を与える
     - SYMLINK+="ttyUSB_GPS": このデバイスにttyUSB_GPSのシンボリックリンクを付加
+
+    Note
+    - == -> condition
+    - = -> insert
+    - += -> append
 
 2. 新しいルールをロードする
 
@@ -99,3 +165,74 @@ ls /dev/ttyUSB*
 4. デバイス名が変更されていることを確認する
 
     ``ls -l /dev/ttyUSB*``を実行する。上手くいっていれば、/dev/ttyUSB_GPS -> ttyUSB0のような表示がある。
+
+
+### 製品のシリアル番号を使う方法
+
+外部サイト：
+[usb-serial のデバイスファイル名を固定する方法](http://d.hatena.ne.jp/pyopyopyo/20160223/p1)
+
+Suppose idVendor is 0403. Then
+`dmesg | grep -iC 4 0403`
+should give the serial number unique to the device.
+
+
+## USB-GPIO cable
+
+Bus 001 Device 007: ID 0403:6015 Future Technology Devices International, Ltd Bridge(I2C/SPI/UART/FIFO)
+Couldn't open device, some information will be missing
+Device Descriptor:
+  bLength                18
+  bDescriptorType         1
+  bcdUSB               2.00
+  bDeviceClass            0 (Defined at Interface level)
+  bDeviceSubClass         0
+  bDeviceProtocol         0
+  bMaxPacketSize0         8
+  idVendor           0x0403 Future Technology Devices International, Ltd
+  idProduct          0x6015 Bridge(I2C/SPI/UART/FIFO)
+  bcdDevice           10.00
+  iManufacturer           1
+  iProduct                2
+  iSerial                 3
+  bNumConfigurations      1
+  Configuration Descriptor:
+    bLength                 9
+    bDescriptorType         2
+    wTotalLength           32
+    bNumInterfaces          1
+    bConfigurationValue     1
+    iConfiguration          0
+    bmAttributes         0x80
+      (Bus Powered)
+    MaxPower               90mA
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        0
+      bAlternateSetting       0
+      bNumEndpoints           2
+      bInterfaceClass       255 Vendor Specific Class
+      bInterfaceSubClass    255 Vendor Specific Subclass
+      bInterfaceProtocol    255 Vendor Specific Protocol
+      iInterface              2
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x81  EP 1 IN
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0040  1x 64 bytes
+        bInterval               0
+      Endpoint Descriptor:
+        bLength                 7
+        bDescriptorType         5
+        bEndpointAddress     0x02  EP 2 OUT
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0040  1x 64 bytes
+        bInterval               0

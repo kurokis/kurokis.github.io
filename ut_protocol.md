@@ -52,6 +52,9 @@ static inline uint16_t CRCCCITT(const uint8_t * array, size_t length)
 ## WaypointController-NaviCtrl間の通信ペイロード
 
 ## ID一覧
+---
+
+Implemention of ID=12 is a TODO for after September experiment.
 
 ID|From|To|Function
 --|----|--|--------
@@ -60,35 +63,79 @@ ID|From|To|Function
 10|NaviCtrl  |Drone Port|Downlink
 11|Drone Port|NaviCtrl  |Set drone port mode
 11|NaviCtrl  |Drone Port|Set drone port mode response
-12|Drone Port|NaviCtrl  |Set waypoint
-12|NaviCtrl  |Drone Port|Set waypoint response
+~~12~~|~~Drone Port~~|~~NaviCtrl~~  |~~Set waypoint~~
+~~12~~|~~NaviCtrl~~  |~~Drone Port~~|~~Set waypoint response~~
+13| Drone Port | NaviCtrl | Send position
+
+
+## 各種変数の意味
+
+  - nav_mode / nav_mode_request
+
+    ```c
+    enum NavMode {
+      NAV_MODE_OFF = 0,
+      NAV_MODE_HOLD = 1,
+      NAV_MODE_AUTO = 2,
+      NAV_MODE_HOME = 3,
+    };
+    ```
+  - drone_port_mode / drone_port_mode_request
+
+    ```c
+    enum DPMode {
+      NCWaypoint = 0,
+      Disarm = 1,
+      Arm = 2,
+      DPHold = 3,
+      DPWaypoint = 4,
+      Takeoff = 5, // Takeoff then hold
+      Land = 6,
+    };
+    ```
+
+  - nav_status
+
+    ```c
+    enum NavStatusBits {
+      HeadingOK = 1<<0,
+      PositionOK = 1<<1,
+      VelocityOK = 1<<2,
+      LOW_PRECISION_VERTICAL = 1<<3,
+      POSITION_RESET_REQUEST = 1<<4,
+      // TODO: ON_GROUND
+    };
+    ```
+
+  - drone_port_status
+
+    ```c
+    enum DPStatus {
+      DPStatusModeInProgress = 0,
+      DPStatusEndOfMode = 1,
+    };
+    ```
 
 ## ペイロード詳細
+---
 
-ID = 10, NaviCtrl -> Drone Port, Downlink
+### ID = 10, NaviCtrl -> Drone Port, Downlink
+---
 
 リクエストに応答するのではなく、NaviCtrlから定期的に送信する方式に変更。送信レートは暫定的に2Hzとする（要検討）。
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
-nav_mode|uint8_t|1|0: Off, 1: Hold, 2: Auto
-drone_port_mode|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: Hold, 4: Waypoint, 5: Takeoff, 6: Land
-nav_status|uint8_t|1|00abcdef
-drone_port_status|uint8_t|1|000000gh
+nav_mode|uint8_t|1|
+drone_port_mode|uint8_t|1|
+nav_status|uint8_t|1|
+drone_port_status|uint8_t|1|
 position|float[3]|12|position in meters
 velocity|float[3]|12|velocity in m/s
 quaternion|float[4]|16|attitude quaternion [q0,qx,qy,qz]
 ||44|
 
-- a: NAV_STATUS_BIT_ON_GROUND
-- b: NAV_STATUS_BIT_POSITION_RESET_REQUEST
-- c: NAV_STATUS_BIT_LOW_PRECISION_VERTICAL
-- d: NAV_STATUS_BIT_VELOCITY_DATA_OK
-- e: NAV_STATUS_BIT_POSITION_DATA_OK
-- f: NAV_STATUS_BIT_HEADING_DATA_OK
-- g: DRONE_PORT_STATUS_ERROR_NO_PREVIOUS
-- h: DRONE_PORT_STATUS_END_OF_MODE
-
+code:
 ```c
 struct ToDronePort {
   uint8_t nav_mode;
@@ -101,26 +148,47 @@ struct ToDronePort {
 } __attribute__((packed));
 ```
 
-ID = 11, Drone Port -> NaviCtrl, Set drone port mode
+
+### ID = 11, Drone Port -> NaviCtrl, Set drone port mode
+---
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
 write_data|uint8_t|1|0: read-only, 1: write
-drone_port_mode_request|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: Hold, 4: Waypoint, 5: Takeoff, 6: Land
+drone_port_mode_request|uint8_t|1|
 ||2|
 
-ID = 11, NaviCtrl -> Drone Port, Set drone port mode response
+code:
+```c
+struct FromDPSetDronePortMode{
+  uint8_t read_write; // 0: read-only, 1: write
+  uint8_t drone_port_mode_request;
+} __attribute__((packed));
+```
+
+
+### ID = 11, NaviCtrl -> Drone Port, Set drone port mode response
+---
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
-drone_port_mode|uint8_t|1|0: NCWaypoint, 1: Disarm, 2: Arm, 3: Hold, 4: Waypoint, 5: Takeoff, 6: Land
-drone_port_status|uint8_t|1|000000gh
+drone_port_mode|uint8_t|1|
+drone_port_status|uint8_t|1|
 ||2|
 
-- g: DRONE_PORT_STATUS_ERROR_NO_PREVIOUS
-- h: DRONE_PORT_STATUS_END_OF_MODE
+code:
+```c
+struct ToDPSetDronePortMode {
+  uint8_t drone_port_mode;
+  uint8_t drone_port_status;
+} __attribute__((packed));
+```
 
-ID = 12, Drone Port -> NaviCtrl, Set waypoint
+
+### ~~ID = 12, Drone Port -> NaviCtrl, Set waypoint~~
+---
+
+TODO, after September experiment.
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
@@ -139,7 +207,11 @@ heading_rate|float|4|max heading rate in deg/s
 heading_range|float|4|max allowable heading error in deg
 ||38|
 
-ID = 12, NaviCtrl -> Drone Port, Set waypoint response
+
+### ~~ID = 12, NaviCtrl -> Drone Port, Set waypoint response~~
+---
+
+TODO, after September experiment.
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
@@ -147,7 +219,9 @@ number_of_waypoints_missing|uint8_t[4]|4|number of waypoints missing for each of
 waypoint_number_missing|uint8_t[4]|4|smallest index of waypoint missing for each of 4 routes
 ||8|
 
-ID = 13, Drone Port -> NaviCtrl, Position
+
+### ID = 13, Drone Port -> NaviCtrl, Send position
+---
 
 Name|Type|Bytes|Meanings
 ----|----|-----|--------
@@ -158,8 +232,12 @@ r_var|float[3]|12|position variance in m^2
 status|uint8_t|1|1: detected, 0: not detected
 ||45|
 
+
+Note: This payload is the same as `struct FromMarker` .
+
+code:
 ```c
-struct FromDronePort {
+struct FromMarker {
   uint32_t timestamp; // microseconds
   float position[3]; // meter
   float quaternion[3]; // x y z
@@ -170,8 +248,10 @@ struct FromDronePort {
 
 
 ## FlightCtrl-NaviCtrl間の通信ペイロード
+---
 
 FlightCtrl -> NaviCtrl (FromFlightCtrl / ToNaviCtrl)
+
 
 ```c
 struct FromFlightCtrl {
@@ -185,7 +265,9 @@ struct FromFlightCtrl {
 } __attribute__((packed));
 ```
 
+
 NaviCtrl -> FlightCtrl (ToFlightCtrl / FromNaviCtrl)
+
 
 ```c
 struct ToFlightCtrl {
@@ -203,7 +285,10 @@ struct ToFlightCtrl {
 } __attribute__((packed));
 ```
 
+
 ## その他　(TCP)
+---
+
 
 ```c
 struct FromMarker {
@@ -215,15 +300,17 @@ struct FromMarker {
 } __attribute__((packed));
 ```
 
+
 ```c
 struct FromGPS {
-  float position[3];
-  float velocity[3];
-  float r_var[3];
-  float v_var[3];
-  uint8_t status; // 0x01: pos OK 0x02: vel OK
+  int32_t longitude; // [10^-6 deg]
+  int32_t latitude; // [10^-6 deg]
+  float z; // height above sea level [m], downward positive
+  float velocity[3]; // [m/s]
+  uint8_t gps_status; // 3: pos & vel OK 2: only pos OK 1: only vel OK 0: unavailable
 } __attribute__((packed));
 ```
+
 
 ```c
 struct FromLSM {
