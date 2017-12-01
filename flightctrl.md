@@ -196,3 +196,97 @@ main.c
 ```c
 SBusSetChannels(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
 ```
+
+## ESCとの接続
+
+ハードウェアはAfro ESCを使い、Simon-Kファームウェアを一部書き換える。
+Afro ESCはデフォルトでSimon-Kファームウェアが入っており、はPWM入力を受けるようになっているが、I2Cのピンに接続することで自動的にI2Cモードになるようになっている。しかし、I2Cはバス接続であるという特性上、それぞれのESCにモーター番号(Motor ID)を割り当てなければならない。これを行うためには、Simon-Kファームウェアをダウンロード、Motor IDを1,2,3,4等に変更してビルドし、ESCに書き込む(flashする)必要がある。
+
+
+以下の記事が参考になる。
+https://www.rcgroups.com/forums/showthread.php?1949316-How-do-I-hook-up-Afro-ESC-to-Mikrokopter-I2C
+
+```
+Default firmware ships for motor #1 only. User needs to build and flash firmware for other motor index.
+https://github.com/sim-/tgy/blob/master/tgy.asm#L173
+Set I2C_ADDR to 0x50 (default motor start address). Then change MOTOR_ID to 1, 2, 3, 4,... etc to match motor index, rebuild firmware, and flash afro_nfet.hex using USB linker.
+```
+[参考：Google code](https://code.google.com/archive/p/afrodevices/wikis/AfroESC.wiki)
+
+
+### 必要なもの
+ - Afro ESC本体
+ - AVRISP mk.IIとAtmel Atmega Socket Firmware Flashing Tool
+   * PCとESCを接続するためのツール(AVRマイコンにファイルを書き込むISPプログラマ)
+   * Flashing ToolをESCのチップにかぶせることでフラッシュできる
+   * 代替ツールも多く存在する(KKMulticopter Flashtoolの公式サイトに対応デバイスがリストアップされている)
+   * https://hobbyking.com/en_us/atmel-atmega-socket-firmware-flashing-tool.html
+ - KKMulticopter Flashtool
+   * ビルドしたファームウェアを書き込むためのツール
+   * 事前にJavaをインストールしておく必要がある
+   * Linux版を強く勧める。Windows版はドライバのインストールなど煩雑な手続きが必要
+   * http://lazyzero.de/en/modellbau/kkmulticopterflashtool よりlatest stable versionをインストール
+
+### 手順
+ 1. Simon-Kをビルドするツール(AVRA 1.3.0以降)をダウンロード、インストール
+    ```
+    Building from Source
+    AVRA 1.3.0 or newer or avrasm2, part of the AVR Tools, should assemble this source. AVRA should also build on a Mac. "make all" will emit a .hex file for every build target; "make binary_zip" will make a release .zip file. There are some other make targets for programming.
+    In AVR Studio, the Makefile is not supported, and just loading tgy.asm and attempting to build it will not define the constant indicating the board type / build target. You must either edit tgy.asm or add an option for the assembler command line to define the board symbol, unless building the default "tgy" board type. For example, this option should emit the bs_nfet target: -D bs_nfet_esc=bs_nfet_esc Look near the top of tgy.asm for the includes and board information.
+    URL: https://github.com/sim-/tgy/blob/master/README.md
+    ```
+    以下のコマンドを実行すればよい
+    ```
+    sudo apt-get install avra
+    ```
+ 1. Simon-Kファームウェアをgithubからクローンし、tgy.asmのMOTOR_IDを設定したい番号に変えてからビルド。たくさんのファイルが生成されるが、このうちAfroESCに書き込むファイルはafro_nfet.hexのみである。
+
+    /tgyの中で以下のコマンドを実行すればよい
+    ```
+    make all
+    ```
+ 1. PCとESCを接続し、フラッシュ用ツール(KKMulticopter Flashtool)でビルドしたhexファイルを書き込む。プログラマはavrisp mkii、ポートはプログラマが接続されているポート(例:/dev/ttyUSB1)、通信設定はデフォルト、書き込むファイルは個別に指定(自分でビルドしたafro_nfet.hexを選択)
+    ```
+    1. Install the Silab driver- http://www.silabs.com/products/mcu/pages/usbtouartbridgevcpdrivers.aspx
+    2. Install KKMulticopter Flash Tool (KKFlashTool) v0.76 - http://www.lazyzero.de/en/modellbau/kkmulticopterflashtool
+    3. Disconnect motors from ESCs.
+    4. Disconnect ESCs from FC Board.
+    5. Connect battery to Power Distribution Board to power ESCs.
+    6. Connect 1st ESC to the Afro ESC USB Programming Tool - ensure ESC brown wire connects to (-) on the Programming Tool.
+    7. Open KKFlashTool.
+    8. Select the following settings:  - Programmer: Afro USB Programming Tool (afrousb) - Port: /dev/cu.SLAB_USBtoUART {tick checkbox to use defaults} - Controller: atmega 8-based brushlessESC (8kb flash) - Repository: Afro NFET - Firmware: Select as appropriate.
+    9. Click the green ‘running man’ button and wait until final message in bottom window reads ...”Flashing of firmware was successful.”
+    10.  Repeat for next ESC  For
+    URL: https://hobbyking.com/media/file/73530954X1785910X23.pdf
+    ```
+
+### AVRISP mk.II
+
+AVRISP mk.IIとFlashing toolを接続した様子。
+前
+
+![](images/avrisp_mk_ii_front.jpg)
+
+後
+
+![](images/avrisp_mk_ii_back.jpg)
+
+
+### Flashing toolとESCの物理的接続
+
+![](images/flashing_tool_orientation.png)
+
+参考: [Atmel Atmega Socket Firmware Flashing Tool > Upload Files > Tool orientation ](https://hobbyking.com/en_us/atmel-atmega-socket-firmware-flashing-tool.html)
+
+![](images/how-to-flash-ESC-with-atmega-flash-tool-orientation.jpg)
+
+参考: [Flash ESC with 1-Wire Bootloader Interface – Via Signal cable – SN20A with BLHeli](https://oscarliang.com/esc-1-wire-bootloader-signal-cable-blheli-simonk/)
+
+![](images/flash_tool_afro_esc_orientation.jpg)
+
+### AVRISP MK IIドライバのインストール(Windowsのみ、Linuxを推奨)
+Linuxの場合はこの手続きは不要である。Windowsの場合は面倒。
+AVRISP mk.IIのドライバが必要なほか、AVRISP mk IIボード上のPL2303HXというUSB-Serial変換ドライバのダウングレードが必要になる(Windows 8以降が非対応であるため)。
+前者はAtmel Studio導入時にインストールされる。
+後者は以下を参照
+http://d.hatena.ne.jp/murase_syuka/20160503/1462235398
