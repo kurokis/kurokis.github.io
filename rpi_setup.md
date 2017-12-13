@@ -18,6 +18,80 @@ CMakeをインストール
 $ sudo apt-get install cmake
 ```
 
+## 開発に必要なハードウェア
+
+
+|ハード|製品名|値段|
+|------|-----|---|
+|Raspberry Pi本体|Raspberry Pi 3 Model B|4500円|
+|モニター|Waveshare 7インチHDMI LCD タッチスクリーン ディスプレイ|10000円|
+|HDMIケーブル|なんでも（千石電商か秋月電子で買うのが確実）|300円|
+|microSDカード|16GB以上|1500円|
+|ACアダプタ|定格3A 5Vのもの|500円|
+|カメラ|Raspberry Pi Camera V2|3500円|
+|キーボード|マイクロソフト All-in-One Media Keyboard N9Z-00029|4000円|
+
+Raspberry Pi、モニター、HDMIケーブル、microSDカードは千石電商でまとめて買うのが楽。特にHDMIケーブルは相性の問題もあるので、店舗で買うのが安くて確実。
+
+## セットアップ方法
+
+はじめにPreferences>Raspberry Pi Configuration>Interfaces>CameraをEnabledにしておく．Raspberry Pi公式のCamera Moduleの動作確認のためには，ターミナルで`raspistill -o photo.jpg` を実行すればよい．開始から数秒後に写真が撮影されるはずである．
+
+ - OpenCV
+
+    OpenCV関係のインストール方法はここに従った．ビルドには5時間程度かかる．
+    https://www.pyimagesearch.com/2017/09/04/raspbian-stretch-install-opencv-3-python-on-your-raspberry-pi/
+
+ - Eigen
+
+    ``$ sudo apt-get install libeigen3-dev``
+
+ - RaspiCam
+
+    カメラモジュールをOpenCVで楽に使うためのライブラリ
+    公式サイトを参考にインストール
+    https://www.uco.es/investiga/grupos/ava/node/40
+
+    最新のもの(raspicam-0.1.6)をダウンロードし解凍．
+    ※重要：OpenCVをインストールしておく必要がある．
+    はじめにrpi-updateを実行する．
+    ```
+    $ sudo rpi-update
+    ```
+    RaspiCam本体をビルド．
+    ```
+    $ cd Downloads/raspicam-0.1.6
+    $ mkdir build
+    $ cd build
+    $ cmake ..
+    ```
+    ダイアログに
+    ``-- CREATE OPENCV MODULE=1``と表示されていることを確認し，
+    ```
+    $ make
+    $ sudo make install
+    $ sudo ldconfig
+    ```
+
+ - aruco
+
+    OpenCV同梱版ではなく，公式版をインストール
+    ```
+    $ cd Downloads/aruco303
+    $ mkdir build
+    $ cd build
+    $ cmake ..
+    $ make -j4
+    $ sudo make install
+    ```
+
+    インストール後に次の設定をする必要がある．[参考](    http://miloq.blogspot.jp/2012/12/install-aruco-ubuntu-linux.html)
+    なお，leafpadはRaspbian Stretchのデフォルトのテキストエディタである．Raspbian Jessieの場合はgeditなどを使えばよい．
+    ```
+    $ sudo leafpad /etc/ld.so.conf.d/aruco.conf
+    ```
+
+
 ## Wifiの優先度設定とIPアドレス固定
 
 外部サイト: [RaspberryPi で複数 Wifi 環境に個別設定を行う方法](http://kouki-hoshi.hatenablog.com/entry/2016/07/16/153836)
